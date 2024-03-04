@@ -2,7 +2,7 @@ const URL_API = "http://localhost:3001";
 const myHeaders = new Headers({
     "Content-Type": "application/json"
 });
-const getProduct = async() => {
+const getContact = async() => {
     try {
         const respuesta = await fetch(`${URL_API}/contacts`);
 		// Si la respuesta es correcta
@@ -20,7 +20,7 @@ const getProduct = async() => {
 	}
     
 }
-const postProduct = async (datos) => {
+const postContact = async (datos) => {
     try {
         return await fetch(`${URL_API}/contacts`, {
             method: "POST",
@@ -31,7 +31,34 @@ const postProduct = async (datos) => {
         console.error('Error en la solicitud POST:', error.message);
     }
 }
+const patchContact = async (datos,id) =>{
+
+    try {
+        return await fetch(`${URL_API}/contacts/${id}`, {
+            method: "PATCH",
+            headers: myHeaders,
+            body: JSON.stringify(datos)
+        });
+    } catch (error) {
+        console.error('Error en la solicitud POST:', error.message);
+    }
+
+}
+const deleteContact = async (id) =>{
+
+    try {
+        return await fetch(`${URL_API}/contacts/${id}`, {
+            method: "DELETE",
+            headers: myHeaders,
+        });
+    } catch (error) {
+        console.error('Error en la solicitud POST:', error.message);
+    }
+
+}
 export {
-    getProduct as getProducts,
-    postProduct as postProducts
+    getContact as getContacts,
+    postContact as postContacts,
+    patchContact as patchContacts,
+    deleteContact as deleteContacts
 };
