@@ -1,3 +1,4 @@
+import {postProducts} from '../../../Apis/contact/contactApi.js';
 export class RegContacto extends HTMLElement {
   constructor() {
     super();
@@ -86,13 +87,32 @@ saveData = () =>{
         const frmRegistro = document.querySelector('#frmDataContacto');
         document.querySelector('#btnGuardar').addEventListener("click", (e) =>{
             const datos = Object.fromEntries(new FormData(frmRegistro).entries());
-            console.log(datos)
-            //postProducts(datos);
+            postProducts(datos)
+            .then(response => {
+                // Verificar si la solicitud fue exitosa (código de respuesta en el rango 200)
+                if (response.ok) {
+                    return response.json(); // Devolver la respuesta como JSON
+                } else {
+                    // Si la respuesta no fue exitosa, lanzar una excepción
+                    throw new Error(`Error en la solicitud POST: ${response.status} - ${response.statusText}`);
+                }
+            })
+            .then(responseData => {
+                // Hacer algo con la respuesta exitosa si es necesario
+                console.log(responseData.id);
+            })
+            .catch(error => {
+                console.error('Error en la solicitud POST:', error.message);
+                // Puedes manejar el error de otra manera si es necesario
+            });
+            this.ctrlBtn(e.target.dataset.ed);
             e.stopImmediatePropagation();
             e.preventDefault();
         })
-        // this.enabledBtns()
-    }
+}
+viewData = (response)=>{
+    console.log(response);
+}
 disableFrm = (estado) =>{
     let frm={
         nombreContacto: '', 
