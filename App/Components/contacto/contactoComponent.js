@@ -35,6 +35,15 @@ export class ContactoComponent extends HTMLElement {
                 let cardActual = document.querySelector(card);
                 cardActual.style.display = 'none';
             });
+            
+            // Recargar listado cuando se hace clic en la pestaña
+            if (data[0] === '#lstContacto') {
+                const lstContacto = document.querySelector('lst-contacto');
+                if (lstContacto) {
+                    lstContacto.loadContacts();
+                }
+            }
+            
             e.stopImmediatePropagation();
             e.preventDefault();
         })

@@ -1,4 +1,4 @@
-const URL_API = "http://localhost:3001";
+const URL_API = "https://68dc4b837cd1948060a9f214.mockapi.io/";
 const myHeaders = new Headers({
     "Content-Type": "application/json"
 });
@@ -8,6 +8,7 @@ const getContact = async() => {
 		// Si la respuesta es correcta
 		if(respuesta.status === 200){
 			const datos = await respuesta.json();
+			return datos;
 		} else if(respuesta.status === 401){
             console.log('La url no es correcta');
 		} else if(respuesta.status === 404){
