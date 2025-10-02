@@ -4,6 +4,7 @@ export class LstCity extends HTMLElement {
     constructor() {
         super();
         this.mostrarPagina();
+        this.setupEventListeners();
     }
 
     async mostrarPagina() {
@@ -17,12 +18,11 @@ export class LstCity extends HTMLElement {
                             <tr>
                                 <th>ID</th>
                                 <th>Nombre</th>
-                                <th>Region ID</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="tablaCities">
-                            <tr><td colspan="4" class="text-center">Cargando...</td></tr>
+                            <tr><td colspan="3" class="text-center">Cargando...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -44,7 +44,6 @@ export class LstCity extends HTMLElement {
                     <tr>
                         <td>${city.id}</td>
                         <td>${city.name}</td>
-                        <td>${city.RegionId || 'N/A'}</td>
                         <td>
                             <button class="btn btn-sm btn-warning edit-city" data-id="${city.id}">Editar</button>
                             <button class="btn btn-sm btn-danger delete-city" data-id="${city.id}">Eliminar</button>
@@ -62,7 +61,7 @@ export class LstCity extends HTMLElement {
                 btn.addEventListener('click', (e) => this.deleteCity(e.target.dataset.id));
             });
         } else {
-            tabla.innerHTML = '<tr><td colspan="4" class="text-center">No hay ciudades registradas</td></tr>';
+            tabla.innerHTML = '<tr><td colspan="3" class="text-center">No hay ciudades registradas</td></tr>';
         }
     }
 
@@ -82,6 +81,24 @@ export class LstCity extends HTMLElement {
         if (response.ok) {
             this.loadCities();
         }
+    }
+
+    setupEventListeners() {
+        // Escuchar eventos de guardado, actualización y eliminación
+        window.addEventListener('citySaved', () => {
+            console.log('Evento citySaved recibido, actualizando listado...');
+            this.loadCities();
+        });
+
+        window.addEventListener('cityUpdated', () => {
+            console.log('Evento cityUpdated recibido, actualizando listado...');
+            this.loadCities();
+        });
+
+        window.addEventListener('cityDeleted', () => {
+            console.log('Evento cityDeleted recibido, actualizando listado...');
+            this.loadCities();
+        });
     }
 }
 

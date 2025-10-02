@@ -111,6 +111,8 @@ export class RegRegion extends HTMLElement {
                     this.resetIdView();
                     this.disableFrm(true);
                     this.ctrlBtn(document.querySelector('#btnNuevo').dataset.ed);
+                    // Disparar evento para actualizar listado
+                    window.dispatchEvent(new CustomEvent('regionUpdated', { detail: { id, datos } }));
                 } else {
                     throw new Error(`Error ${response.status}: ${response.statusText}`);
                 }
@@ -137,6 +139,8 @@ export class RegRegion extends HTMLElement {
                     this.resetIdView();
                     this.disableFrm(true);
                     this.ctrlBtn(document.querySelector('#btnNuevo').dataset.ed);
+                    // Disparar evento para actualizar listado
+                    window.dispatchEvent(new CustomEvent('regionDeleted', { detail: { id } }));
                 } else {
                     throw new Error(`Error ${response.status}: ${response.statusText}`);
                 }
@@ -150,24 +154,37 @@ export class RegRegion extends HTMLElement {
     saveData = () => {
         const frmRegistro = document.querySelector('#frmDataRegion');
         document.querySelector('#btnGuardar').addEventListener("click", (e) => {
-            const datos = Object.fromEntries(new FormData(frmRegistro).entries());
-            postRegions(datos)
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        throw new Error(`Error en la solicitud POST: ${response.status} - ${response.statusText}`);
-                    }
-                })
-                .then(responseData => {
-                    this.viewData(responseData.id);
-                })
-                .catch(error => {
-                    console.error('Error al crear región:', error.message);
-                });
-            this.ctrlBtn(e.target.dataset.ed);
-            e.stopImmediatePropagation();
-            e.preventDefault();
+            try {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                
+                const datos = Object.fromEntries(new FormData(frmRegistro).entries());
+                console.log('Guardando región:', datos);
+                
+                postRegions(datos)
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        } else {
+                            throw new Error(`Error en la solicitud POST: ${response.status} - ${response.statusText}`);
+                        }
+                    })
+                    .then(responseData => {
+                        console.log('Región guardada exitosamente:', responseData);
+                        this.viewData(responseData.id);
+                        this.disableFrm(true);
+                        this.ctrlBtn(e.target.dataset.ed);
+                        // Disparar evento para actualizar listado
+                        window.dispatchEvent(new CustomEvent('regionSaved', { detail: responseData }));
+                    })
+                    .catch(error => {
+                        console.error('Error al crear región:', error.message);
+                        alert('Error al crear la región: ' + error.message);
+                    });
+            } catch (error) {
+                console.error('Error en saveData:', error);
+                alert('Error inesperado: ' + error.message);
+            }
         })
     }
 

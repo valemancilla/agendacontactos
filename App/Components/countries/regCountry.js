@@ -4,11 +4,14 @@ export class RegCountry extends HTMLElement {
     constructor() {
         super();
         this.render();
-        this.saveData();
-        this.enabledBtns();
-        this.eventoEditar();
-        this.eventoEliminar();
-        this.disableFrm(true);
+        // Usar setTimeout para asegurar que el DOM esté listo
+        setTimeout(() => {
+            this.saveData();
+            this.enabledBtns();
+            this.eventoEditar();
+            this.eventoEliminar();
+            this.disableFrm(true);
+        }, 0);
     }
 
     render() {
@@ -111,6 +114,8 @@ export class RegCountry extends HTMLElement {
                     this.resetIdView();
                     this.disableFrm(true);
                     this.ctrlBtn(document.querySelector('#btnNuevo').dataset.ed);
+                    // Disparar evento para actualizar listado
+                    window.dispatchEvent(new CustomEvent('countryUpdated', { detail: { id, datos } }));
                 } else {
                     throw new Error(`Error ${response.status}: ${response.statusText}`);
                 }
@@ -137,6 +142,8 @@ export class RegCountry extends HTMLElement {
                     this.resetIdView();
                     this.disableFrm(true);
                     this.ctrlBtn(document.querySelector('#btnNuevo').dataset.ed);
+                    // Disparar evento para actualizar listado
+                    window.dispatchEvent(new CustomEvent('countryDeleted', { detail: { id } }));
                 } else {
                     throw new Error(`Error ${response.status}: ${response.statusText}`);
                 }
@@ -149,13 +156,23 @@ export class RegCountry extends HTMLElement {
 
     saveData = () => {
         const frmRegistro = document.querySelector('#frmDataCountry');
-        document.querySelector('#btnGuardar').addEventListener("click", (e) => {
+        const btnGuardar = document.querySelector('#btnGuardar');
+        
+        console.log('🔧 Configurando evento para botón guardar:', btnGuardar);
+        
+        if (!btnGuardar) {
+            console.error('❌ No se encontró el botón guardar');
+            return;
+        }
+        
+        btnGuardar.addEventListener("click", (e) => {
+            console.log('🖱️ Botón guardar clickeado');
             try {
                 e.stopImmediatePropagation();
                 e.preventDefault();
                 
                 const datos = Object.fromEntries(new FormData(frmRegistro).entries());
-                console.log('Guardando país:', datos);
+                console.log('📤 Guardando país:', datos);
                 
                 postCountries(datos)
                     .then(response => {
@@ -168,7 +185,10 @@ export class RegCountry extends HTMLElement {
                     .then(responseData => {
                         console.log('País guardado exitosamente:', responseData);
                         this.viewData(responseData.id);
+                        this.disableFrm(true);
                         this.ctrlBtn(e.target.dataset.ed);
+                        // Disparar evento para actualizar listado
+                        window.dispatchEvent(new CustomEvent('countrySaved', { detail: responseData }));
                     })
                     .catch(error => {
                         console.error('Error al crear país:', error.message);

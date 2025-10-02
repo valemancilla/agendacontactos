@@ -4,6 +4,7 @@ export class LstBranch extends HTMLElement {
     constructor() {
         super();
         this.mostrarPagina();
+        this.setupEventListeners();
     }
 
     async mostrarPagina() {
@@ -20,13 +21,11 @@ export class LstBranch extends HTMLElement {
                                 <th>Contacto</th>
                                 <th>Teléfono</th>
                                 <th>Email</th>
-                                <th>City ID</th>
-                                <th>Company ID</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="tablaBranches">
-                            <tr><td colspan="8" class="text-center">Cargando...</td></tr>
+                            <tr><td colspan="6" class="text-center">Cargando...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -51,8 +50,6 @@ export class LstBranch extends HTMLElement {
                         <td>${branch.Contact_name}</td>
                         <td>${branch.Phone || 'N/A'}</td>
                         <td>${branch.email || 'N/A'}</td>
-                        <td>${branch.CityId || 'N/A'}</td>
-                        <td>${branch.CompanyId || 'N/A'}</td>
                         <td>
                             <button class="btn btn-sm btn-warning edit-branch" data-id="${branch.id}">Editar</button>
                             <button class="btn btn-sm btn-danger delete-branch" data-id="${branch.id}">Eliminar</button>
@@ -70,7 +67,7 @@ export class LstBranch extends HTMLElement {
                 btn.addEventListener('click', (e) => this.deleteBranch(e.target.dataset.id));
             });
         } else {
-            tabla.innerHTML = '<tr><td colspan="8" class="text-center">No hay sucursales registradas</td></tr>';
+            tabla.innerHTML = '<tr><td colspan="6" class="text-center">No hay sucursales registradas</td></tr>';
         }
     }
 
@@ -90,6 +87,24 @@ export class LstBranch extends HTMLElement {
         if (response.ok) {
             this.loadBranches();
         }
+    }
+
+    setupEventListeners() {
+        // Escuchar eventos de guardado, actualización y eliminación
+        window.addEventListener('branchSaved', () => {
+            console.log('Evento branchSaved recibido, actualizando listado...');
+            this.loadBranches();
+        });
+
+        window.addEventListener('branchUpdated', () => {
+            console.log('Evento branchUpdated recibido, actualizando listado...');
+            this.loadBranches();
+        });
+
+        window.addEventListener('branchDeleted', () => {
+            console.log('Evento branchDeleted recibido, actualizando listado...');
+            this.loadBranches();
+        });
     }
 }
 

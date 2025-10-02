@@ -111,6 +111,8 @@ export class RegCity extends HTMLElement {
                     this.resetIdView();
                     this.disableFrm(true);
                     this.ctrlBtn(document.querySelector('#btnNuevo').dataset.ed);
+                    // Disparar evento para actualizar listado
+                    window.dispatchEvent(new CustomEvent('cityUpdated', { detail: { id, datos } }));
                 } else {
                     throw new Error(`Error ${response.status}: ${response.statusText}`);
                 }
@@ -137,6 +139,8 @@ export class RegCity extends HTMLElement {
                     this.resetIdView();
                     this.disableFrm(true);
                     this.ctrlBtn(document.querySelector('#btnNuevo').dataset.ed);
+                    // Disparar evento para actualizar listado
+                    window.dispatchEvent(new CustomEvent('cityDeleted', { detail: { id } }));
                 } else {
                     throw new Error(`Error ${response.status}: ${response.statusText}`);
                 }
@@ -150,24 +154,37 @@ export class RegCity extends HTMLElement {
     saveData = () => {
         const frmRegistro = document.querySelector('#frmDataCity');
         document.querySelector('#btnGuardar').addEventListener("click", (e) => {
-            const datos = Object.fromEntries(new FormData(frmRegistro).entries());
-            postCities(datos)
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        throw new Error(`Error en la solicitud POST: ${response.status} - ${response.statusText}`);
-                    }
-                })
-                .then(responseData => {
-                    this.viewData(responseData.id);
-                })
-                .catch(error => {
-                    console.error('Error al crear ciudad:', error.message);
-                });
-            this.ctrlBtn(e.target.dataset.ed);
-            e.stopImmediatePropagation();
-            e.preventDefault();
+            try {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                
+                const datos = Object.fromEntries(new FormData(frmRegistro).entries());
+                console.log('Guardando ciudad:', datos);
+                
+                postCities(datos)
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        } else {
+                            throw new Error(`Error en la solicitud POST: ${response.status} - ${response.statusText}`);
+                        }
+                    })
+                    .then(responseData => {
+                        console.log('Ciudad guardada exitosamente:', responseData);
+                        this.viewData(responseData.id);
+                        this.disableFrm(true);
+                        this.ctrlBtn(e.target.dataset.ed);
+                        // Disparar evento para actualizar listado
+                        window.dispatchEvent(new CustomEvent('citySaved', { detail: responseData }));
+                    })
+                    .catch(error => {
+                        console.error('Error al crear ciudad:', error.message);
+                        alert('Error al crear la ciudad: ' + error.message);
+                    });
+            } catch (error) {
+                console.error('Error en saveData:', error);
+                alert('Error inesperado: ' + error.message);
+            }
         })
     }
 

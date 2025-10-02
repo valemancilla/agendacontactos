@@ -4,6 +4,7 @@ export class LstRegion extends HTMLElement {
     constructor() {
         super();
         this.mostrarPagina();
+        this.setupEventListeners();
     }
 
     async mostrarPagina() {
@@ -17,12 +18,11 @@ export class LstRegion extends HTMLElement {
                             <tr>
                                 <th>ID</th>
                                 <th>Nombre</th>
-                                <th>Country ID</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="tablaRegions">
-                            <tr><td colspan="4" class="text-center">Cargando...</td></tr>
+                            <tr><td colspan="3" class="text-center">Cargando...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -44,7 +44,6 @@ export class LstRegion extends HTMLElement {
                     <tr>
                         <td>${region.id}</td>
                         <td>${region.name}</td>
-                        <td>${region.CountryId || 'N/A'}</td>
                         <td>
                             <button class="btn btn-sm btn-warning edit-region" data-id="${region.id}">Editar</button>
                             <button class="btn btn-sm btn-danger delete-region" data-id="${region.id}">Eliminar</button>
@@ -62,7 +61,7 @@ export class LstRegion extends HTMLElement {
                 btn.addEventListener('click', (e) => this.deleteRegion(e.target.dataset.id));
             });
         } else {
-            tabla.innerHTML = '<tr><td colspan="4" class="text-center">No hay regiones registradas</td></tr>';
+            tabla.innerHTML = '<tr><td colspan="3" class="text-center">No hay regiones registradas</td></tr>';
         }
     }
 
@@ -82,6 +81,24 @@ export class LstRegion extends HTMLElement {
         if (response.ok) {
             this.loadRegions();
         }
+    }
+
+    setupEventListeners() {
+        // Escuchar eventos de guardado, actualización y eliminación
+        window.addEventListener('regionSaved', () => {
+            console.log('Evento regionSaved recibido, actualizando listado...');
+            this.loadRegions();
+        });
+
+        window.addEventListener('regionUpdated', () => {
+            console.log('Evento regionUpdated recibido, actualizando listado...');
+            this.loadRegions();
+        });
+
+        window.addEventListener('regionDeleted', () => {
+            console.log('Evento regionDeleted recibido, actualizando listado...');
+            this.loadRegions();
+        });
     }
 }
 

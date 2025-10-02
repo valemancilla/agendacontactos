@@ -4,6 +4,7 @@ export class LstCountry extends HTMLElement {
     constructor() {
         super();
         this.mostrarPagina();
+        this.setupEventListeners();
     }
 
     async mostrarPagina() {
@@ -103,6 +104,24 @@ export class LstCountry extends HTMLElement {
             console.error('Error al eliminar país:', error);
             alert('Error al eliminar el país: ' + error.message);
         }
+    }
+
+    setupEventListeners() {
+        // Escuchar eventos de guardado, actualización y eliminación
+        window.addEventListener('countrySaved', () => {
+            console.log('Evento countrySaved recibido, actualizando listado...');
+            this.loadCountries();
+        });
+
+        window.addEventListener('countryUpdated', () => {
+            console.log('Evento countryUpdated recibido, actualizando listado...');
+            this.loadCountries();
+        });
+
+        window.addEventListener('countryDeleted', () => {
+            console.log('Evento countryDeleted recibido, actualizando listado...');
+            this.loadCountries();
+        });
     }
 }
 

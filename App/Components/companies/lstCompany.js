@@ -4,6 +4,7 @@ export class LstCompany extends HTMLElement {
     constructor() {
         super();
         this.mostrarPagina();
+        this.setupEventListeners();
     }
 
     async mostrarPagina() {
@@ -19,12 +20,11 @@ export class LstCompany extends HTMLElement {
                                 <th>Nombre</th>
                                 <th>UKNiu</th>
                                 <th>Email</th>
-                                <th>City ID</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="tablaCompanies">
-                            <tr><td colspan="6" class="text-center">Cargando...</td></tr>
+                            <tr><td colspan="5" class="text-center">Cargando...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -48,7 +48,6 @@ export class LstCompany extends HTMLElement {
                         <td>${company.name}</td>
                         <td>${company.UKNiu}</td>
                         <td>${company.email || 'N/A'}</td>
-                        <td>${company.CityId || 'N/A'}</td>
                         <td>
                             <button class="btn btn-sm btn-warning edit-company" data-id="${company.id}">Editar</button>
                             <button class="btn btn-sm btn-danger delete-company" data-id="${company.id}">Eliminar</button>
@@ -66,7 +65,7 @@ export class LstCompany extends HTMLElement {
                 btn.addEventListener('click', (e) => this.deleteCompany(e.target.dataset.id));
             });
         } else {
-            tabla.innerHTML = '<tr><td colspan="6" class="text-center">No hay empresas registradas</td></tr>';
+            tabla.innerHTML = '<tr><td colspan="5" class="text-center">No hay empresas registradas</td></tr>';
         }
     }
 
@@ -86,6 +85,24 @@ export class LstCompany extends HTMLElement {
         if (response.ok) {
             this.loadCompanies();
         }
+    }
+
+    setupEventListeners() {
+        // Escuchar eventos de guardado, actualización y eliminación
+        window.addEventListener('companySaved', () => {
+            console.log('Evento companySaved recibido, actualizando listado...');
+            this.loadCompanies();
+        });
+
+        window.addEventListener('companyUpdated', () => {
+            console.log('Evento companyUpdated recibido, actualizando listado...');
+            this.loadCompanies();
+        });
+
+        window.addEventListener('companyDeleted', () => {
+            console.log('Evento companyDeleted recibido, actualizando listado...');
+            this.loadCompanies();
+        });
     }
 }
 

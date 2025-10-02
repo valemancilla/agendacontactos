@@ -126,6 +126,8 @@ export class RegCompany extends HTMLElement {
                     this.resetIdView();
                     this.disableFrm(true);
                     this.ctrlBtn(document.querySelector('#btnNuevo').dataset.ed);
+                    // Disparar evento para actualizar listado
+                    window.dispatchEvent(new CustomEvent('companyUpdated', { detail: { id, datos } }));
                 } else {
                     throw new Error(`Error ${response.status}: ${response.statusText}`);
                 }
@@ -152,6 +154,8 @@ export class RegCompany extends HTMLElement {
                     this.resetIdView();
                     this.disableFrm(true);
                     this.ctrlBtn(document.querySelector('#btnNuevo').dataset.ed);
+                    // Disparar evento para actualizar listado
+                    window.dispatchEvent(new CustomEvent('companyDeleted', { detail: { id } }));
                 } else {
                     throw new Error(`Error ${response.status}: ${response.statusText}`);
                 }
@@ -165,26 +169,37 @@ export class RegCompany extends HTMLElement {
     saveData = () => {
         const frmRegistro = document.querySelector('#frmDataCompany');
         document.querySelector('#btnGuardar').addEventListener("click", (e) => {
-            const datos = Object.fromEntries(new FormData(frmRegistro).entries());
-            
-            console.log('📤 Datos a enviar:', datos);
-            postCompanies(datos)
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        throw new Error(`Error en la solicitud POST: ${response.status} - ${response.statusText}`);
-                    }
-                })
-                .then(responseData => {
-                    this.viewData(responseData.id);
-                })
-                .catch(error => {
-                    console.error('Error al crear empresa:', error.message);
-                });
-            this.ctrlBtn(e.target.dataset.ed);
-            e.stopImmediatePropagation();
-            e.preventDefault();
+            try {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                
+                const datos = Object.fromEntries(new FormData(frmRegistro).entries());
+                console.log('📤 Datos a enviar:', datos);
+                
+                postCompanies(datos)
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        } else {
+                            throw new Error(`Error en la solicitud POST: ${response.status} - ${response.statusText}`);
+                        }
+                    })
+                    .then(responseData => {
+                        console.log('Empresa guardada exitosamente:', responseData);
+                        this.viewData(responseData.id);
+                        this.disableFrm(true);
+                        this.ctrlBtn(e.target.dataset.ed);
+                        // Disparar evento para actualizar listado
+                        window.dispatchEvent(new CustomEvent('companySaved', { detail: responseData }));
+                    })
+                    .catch(error => {
+                        console.error('Error al crear empresa:', error.message);
+                        alert('Error al crear la empresa: ' + error.message);
+                    });
+            } catch (error) {
+                console.error('Error en saveData:', error);
+                alert('Error inesperado: ' + error.message);
+            }
         })
     }
 

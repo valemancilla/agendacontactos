@@ -27,22 +27,39 @@
   ],
   "countries": [
     {
-      "id": "b270",
+      "id": "1",
       "name": "colombia"
     }
   ],
   "regions": [
     {
-      "id": "df93",
+      "id": "1",
       "name": "santander"
     }
   ],
   "cities": [
     {
-      "id": "a5bb",
+      "id": "1",
       "name": "bucaramanga"
     }
   ],
-  "companies": [],
-  "branches": []
+  "companies": [
+    {
+      "id": "1",
+      "name": "dfdfdfdfd",
+      "UKNiu": "",
+      "address": "dfdfd",
+      "email": "fdf"
+    }
+  ],
+  "branches": [
+    {
+      "id": "1",
+      "numberComercial": "dfdf",
+      "Contact_name": "dfdf",
+      "Address": "dfdff",
+      "Phone": "dfd",
+      "email": "dffd"
+    }
+  ]
 }

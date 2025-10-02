@@ -23,11 +23,8 @@ const getCities = async() => {
 
 const postCities = async (datos) => {
     try {
-        return await fetch(URL_API, {
-            method: "POST",
-            headers: myHeaders,
-            body: JSON.stringify(datos)
-        });
+        // Usar el gestor de IDs para crear con ID secuencial
+        return await IdManager.createWithSequentialId('cities', datos);
     } catch (error) {
         console.error('Error en la solicitud POST:', error.message);
     }
