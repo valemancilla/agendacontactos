@@ -76,6 +76,14 @@ resetIdView =() =>{
     const idView = document.querySelector('#idView');
     idView.innerHTML = '';   
 }
+
+recargarLista = () => {
+    // Recargar la lista de contactos
+    const lstComponent = document.querySelector('lst-contacto');
+    if (lstComponent) {
+        lstComponent.loadContacts();
+    }
+}
 eventoEditar =() =>{
     document.querySelector('#btnEditar').addEventListener("click",(e) =>{
         this.editData();
@@ -91,14 +99,25 @@ eventoEliminar =() =>{
     });
 }
 ctrlBtn = (e) =>{
+    console.log('🔧 ctrlBtn ejecutado con:', e);
     let data = JSON.parse(e);
+    console.log('🔧 Datos parseados:', data);
+    
     data[0].forEach(boton => {
         let btnActual = document.querySelector(boton);
-        btnActual.classList.remove('disabled');
+        if (btnActual) {
+            btnActual.disabled = false;
+            btnActual.classList.remove('disabled');
+            console.log('✅ Habilitado:', boton);
+        }
     });
     data[1].forEach(boton => {
         let btnActual = document.querySelector(boton);
-        btnActual.classList.add('disabled');
+        if (btnActual) {
+            btnActual.disabled = true;
+            btnActual.classList.add('disabled');
+            console.log('❌ Deshabilitado:', boton);
+        }
     });
 }
 enabledBtns =() =>{
@@ -107,10 +126,25 @@ enabledBtns =() =>{
     })
 }
 editData = () =>{
+    console.log('🔥 MÉTODO editData EJECUTADO');
+    
     const frmRegistro = document.querySelector('#frmDataContacto');
     const datos = Object.fromEntries(new FormData(frmRegistro).entries());
     const idView = document.querySelector('#idView');
     let id = idView.textContent;
+    
+    console.log('=== INICIANDO EDICIÓN ===');
+    console.log('ID del contacto:', id);
+    console.log('Formulario:', frmRegistro);
+    console.log('Datos del formulario:', datos);
+    console.log('Elementos del formulario:', frmRegistro.elements);
+    
+    // Verificar que el ID no esté vacío
+    if (!id || id.trim() === '') {
+        console.error('ERROR: No hay ID para editar');
+        return;
+    }
+    
     patchContacts(datos,id)
     .then(response => {
         // Verificar si la solicitud fue exitosa (código de respuesta en el rango 200)
@@ -118,21 +152,37 @@ editData = () =>{
             return response.json(); // Devolver la respuesta como JSON
         } else {
             // Si la respuesta no fue exitosa, lanzar una excepción
-            throw new Error(`Error en la solicitud POST: ${response.status} - ${response.statusText}`);
+            throw new Error(`Error en la solicitud PATCH: ${response.status} - ${response.statusText}`);
         }
     })
     .then(responseData => {
-        // Hacer algo con la respuesta exitosa si es necesario
+        console.log('Contacto actualizado exitosamente:', responseData);
+        // Limpiar el formulario
+        this.resetIdView();
+        this.disableFrm(true);
+        // Cambiar botones a estado inicial
+        this.ctrlBtn('[["#btnNuevo"],["#btnGuardar","#btnCancelar","#btnEditar","#btnEliminar"]]');
+        // Recargar la lista de contactos
+        this.recargarLista();
     })
     .catch(error => {
-        console.error('Error en la solicitud POST:', error.message);
-        // Puedes manejar el error de otra manera si es necesario
+        console.error('Error en la solicitud PATCH:', error.message);
     });
-    
 }
 delData = () =>{
+    console.log('🔥 MÉTODO delData EJECUTADO');
+    
     const idView = document.querySelector('#idView');
     let id = idView.textContent;
+    
+    console.log('Eliminando contacto con ID:', id);
+    
+    // Verificar que el ID no esté vacío
+    if (!id || id.trim() === '') {
+        console.error('ERROR: No hay ID para eliminar');
+        return;
+    }
+    
     deleteContacts(id)
     .then(response => {
         // Verificar si la solicitud fue exitosa (código de respuesta en el rango 200)
@@ -140,18 +190,19 @@ delData = () =>{
             return response.json(); // Devolver la respuesta como JSON
         } else {
             // Si la respuesta no fue exitosa, lanzar una excepción
-            throw new Error(`Error en la solicitud POST: ${response.status} - ${response.statusText}`);
+            throw new Error(`Error en la solicitud DELETE: ${response.status} - ${response.statusText}`);
         }
     })
     .then(responseData => {
+        console.log('Contacto eliminado exitosamente:', responseData);
         this.resetIdView();
         this.disableFrm(true);
-        this.ctrlBtn(e.target.dataset.ed);
-        // Hacer algo con la respuesta exitosa si es necesario
+        this.ctrlBtn('[["#btnNuevo"],["#btnGuardar","#btnCancelar","#btnEditar","#btnEliminar"]]');
+        // Recargar la lista de contactos
+        this.recargarLista();
     })
     .catch(error => {
-        console.error('Error en la solicitud POST:', error.message);
-        // Puedes manejar el error de otra manera si es necesario
+        console.error('Error en la solicitud DELETE:', error.message);
     });   
 }
 saveData = () =>{
@@ -170,7 +221,10 @@ saveData = () =>{
             })
             .then(responseData => {
                 // Hacer algo con la respuesta exitosa si es necesario
+                console.log('Contacto creado exitosamente:', responseData);
                 this.viewData(responseData.id);
+                // Recargar la lista de contactos
+                this.recargarLista();
             })
             .catch(error => {
                 console.error('Error en la solicitud POST:', error.message);

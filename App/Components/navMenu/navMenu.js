@@ -20,10 +20,19 @@ export class NavMenu extends HTMLElement{
                     <a class="nav-link active" aria-current="page" href="#" data-verocultar='["c"]'>Contactos</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="#" data-verocultar='["ct"]'>Citas contactos</a>
+                    <a class="nav-link" href="#" data-verocultar='["countries"]'>Countries</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+                    <a class="nav-link" href="#" data-verocultar='["cities"]'>Cities</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="#" data-verocultar='["regions"]'>Regions</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="#" data-verocultar='["companies"]'>Companies</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="#" data-verocultar='["branches"]'>Branches</a>
                   </li>
                 </ul>
               </div>
@@ -38,6 +47,21 @@ export class NavMenu extends HTMLElement{
               switch (data[0]){
                 case 'c':
                   mainContent.innerHTML="<contacto-component></contacto-component>";
+                  break;
+                case 'countries':
+                  mainContent.innerHTML="<country-component></country-component>";
+                  break;
+                case 'regions':
+                  mainContent.innerHTML="<region-component></region-component>";
+                  break;
+                case 'cities':
+                  mainContent.innerHTML="<city-component></city-component>";
+                  break;
+                case 'companies':
+                  mainContent.innerHTML="<company-component></company-component>";
+                  break;
+                case 'branches':
+                  mainContent.innerHTML="<branch-component></branch-component>";
                   break;
               }
               e.stopImmediatePropagation();

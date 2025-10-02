@@ -4,22 +4,25 @@ const myHeaders = new Headers({
 });
 const getContact = async() => {
     try {
+        console.log('Obteniendo contactos de:', `${URL_API}/contacts`);
         const respuesta = await fetch(`${URL_API}/contacts`);
-		// Si la respuesta es correcta
-		if(respuesta.status === 200){
-			const datos = await respuesta.json();
-			return datos;
-		} else if(respuesta.status === 401){
+        console.log('Respuesta GET status:', respuesta.status);
+        
+        // Si la respuesta es correcta
+        if(respuesta.status === 200){
+            const datos = await respuesta.json();
+            console.log('Contactos obtenidos:', datos);
+            return datos;
+        } else if(respuesta.status === 401){
             console.log('La url no es correcta');
-		} else if(respuesta.status === 404){
-            console.log('El el contacto  no existe');
-		} else {
-            console.log('Se presento un error en la peticion consulte al Administrador');
-		} 
-	} catch(error){
-        console.log(error);
-	}
-    
+        } else if(respuesta.status === 404){
+            console.log('El contacto no existe');
+        } else {
+            console.log('Se presentó un error en la petición consulte al Administrador');
+        } 
+    } catch(error){
+        console.error('Error al obtener contactos:', error);
+    }
 }
 const postContact = async (datos) => {
     try {
@@ -33,17 +36,24 @@ const postContact = async (datos) => {
     }
 }
 const patchContact = async (datos,id) =>{
-
     try {
-        return await fetch(`${URL_API}/contacts/${id}`, {
+        console.log('Enviando PATCH a:', `${URL_API}/contacts/${id}`);
+        console.log('Datos enviados:', datos);
+        
+        const response = await fetch(`${URL_API}/contacts/${id}`, {
             method: "PATCH",
             headers: myHeaders,
             body: JSON.stringify(datos)
         });
+        
+        console.log('Respuesta PATCH status:', response.status);
+        console.log('Respuesta PATCH:', response);
+        
+        return response;
     } catch (error) {
-        console.error('Error en la solicitud POST:', error.message);
+        console.error('Error en la solicitud PATCH:', error.message);
+        throw error;
     }
-
 }
 const deleteContact = async (id) =>{
 
@@ -57,6 +67,7 @@ const deleteContact = async (id) =>{
     }
 
 }
+
 export {
     getContact as getContacts,
     postContact as postContacts,
