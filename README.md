@@ -218,5 +218,6 @@ Cada módulo tiene la misma estructura de componentes:
 
 ---
 
-**AUTOR**
+# AUTOR
+
 valentina mancilla 
