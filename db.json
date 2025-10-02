@@ -29,37 +29,20 @@
     {
       "id": "1",
       "name": "colombia"
+    },
+    {
+      "id": "2",
+      "name": "venezuela"
     }
   ],
   "regions": [
     {
       "id": "1",
-      "name": "santander"
+      "name": "santander",
+      "countryId": "2"
     }
   ],
-  "cities": [
-    {
-      "id": "1",
-      "name": "bucaramanga"
-    }
-  ],
-  "companies": [
-    {
-      "id": "1",
-      "name": "dfdfdfdfd",
-      "UKNiu": "",
-      "address": "dfdfd",
-      "email": "fdf"
-    }
-  ],
-  "branches": [
-    {
-      "id": "1",
-      "numberComercial": "dfdf",
-      "Contact_name": "dfdf",
-      "Address": "dfdff",
-      "Phone": "dfd",
-      "email": "dffd"
-    }
-  ]
+  "cities": [],
+  "companies": [],
+  "branches": []
 }

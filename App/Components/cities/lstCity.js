@@ -1,4 +1,5 @@
 import { getCities, deleteCities } from '../../../Apis/city/cityApi.js';
+import { getRegions } from '../../../Apis/region/regionApi.js';
 
 export class LstCity extends HTMLElement {
     constructor() {
@@ -18,11 +19,12 @@ export class LstCity extends HTMLElement {
                             <tr>
                                 <th>ID</th>
                                 <th>Nombre</th>
+                                <th>Región</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="tablaCities">
-                            <tr><td colspan="3" class="text-center">Cargando...</td></tr>
+                            <tr><td colspan="4" class="text-center">Cargando...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -34,34 +36,49 @@ export class LstCity extends HTMLElement {
     }
 
     async loadCities() {
-        const cities = await getCities();
-        const tabla = this.querySelector('#tablaCities');
-        
-        if (cities && cities.length > 0) {
-            let filas = '';
-            cities.forEach(city => {
-                filas += `
-                    <tr>
-                        <td>${city.id}</td>
-                        <td>${city.name}</td>
-                        <td>
-                            <button class="btn btn-sm btn-warning edit-city" data-id="${city.id}">Editar</button>
-                            <button class="btn btn-sm btn-danger delete-city" data-id="${city.id}">Eliminar</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            tabla.innerHTML = filas;
+        try {
+            const [cities, regions] = await Promise.all([
+                getCities(),
+                getRegions()
+            ]);
+            
+            const tabla = this.querySelector('#tablaCities');
+            
+            if (cities && cities.length > 0) {
+                let filas = '';
+                cities.forEach(city => {
+                    // Buscar el nombre de la región
+                    const region = regions.find(r => r.id === city.regionId);
+                    const regionName = region ? region.name : 'No asignada';
+                    
+                    filas += `
+                        <tr>
+                            <td>${city.id}</td>
+                            <td>${city.name}</td>
+                            <td>${regionName}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning edit-city" data-id="${city.id}">Editar</button>
+                                <button class="btn btn-sm btn-danger delete-city" data-id="${city.id}">Eliminar</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tabla.innerHTML = filas;
 
-            tabla.querySelectorAll('.edit-city').forEach(btn => {
-                btn.addEventListener('click', (e) => this.editCity(e.target.dataset.id));
-            });
+                tabla.querySelectorAll('.edit-city').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.editCity(e.target.dataset.id));
+                });
 
-            tabla.querySelectorAll('.delete-city').forEach(btn => {
-                btn.addEventListener('click', (e) => this.deleteCity(e.target.dataset.id));
-            });
-        } else {
-            tabla.innerHTML = '<tr><td colspan="3" class="text-center">No hay ciudades registradas</td></tr>';
+                tabla.querySelectorAll('.delete-city').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.deleteCity(e.target.dataset.id));
+                });
+            } else {
+                tabla.innerHTML = '<tr><td colspan="4" class="text-center">No hay ciudades registradas</td></tr>';
+            }
+        } catch (error) {
+            console.error('Error cargando ciudades:', error);
+            const tabla = this.querySelector('#tablaCities');
+            tabla.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Error al cargar las ciudades</td></tr>';
         }
     }
 

@@ -1,14 +1,19 @@
 import { postRegions, patchRegions, deleteRegions } from '../../../Apis/region/regionApi.js';
+import { getCountries } from '../../../Apis/country/countryApi.js';
 
 export class RegRegion extends HTMLElement {
     constructor() {
         super();
         this.render();
-        this.saveData();
-        this.enabledBtns();
-        this.eventoEditar();
-        this.eventoEliminar();
-        this.disableFrm(true);
+        // Usar setTimeout para asegurar que el DOM esté listo
+        setTimeout(() => {
+            this.loadCountries();
+            this.saveData();
+            this.enabledBtns();
+            this.eventoEditar();
+            this.eventoEliminar();
+            this.disableFrm(true);
+        }, 0);
     }
 
     render() {
@@ -26,6 +31,12 @@ export class RegRegion extends HTMLElement {
                             <div class="col">
                                 <label for="name" class="form-label">Nombre de la Región</label>
                                 <input type="text" class="form-control" id="name" name="name">
+                            </div>
+                            <div class="col">
+                                <label for="countryId" class="form-label">País</label>
+                                <select class="form-control" id="countryId" name="countryId">
+                                    <option value="">Seleccionar país...</option>
+                                </select>
                             </div>
                         </div>
                         <div class="row mt-3">
@@ -196,14 +207,39 @@ export class RegRegion extends HTMLElement {
     fillForm = (region) => {
         const frmRegistro = document.querySelector('#frmDataRegion');
         frmRegistro.elements['name'].value = region.name;
+        frmRegistro.elements['countryId'].value = region.countryId || '';
         this.viewData(region.id);
         this.disableFrm(false);
+    }
+
+    loadCountries = async () => {
+        try {
+            const countries = await getCountries();
+            const countrySelect = document.querySelector('#countryId');
+            
+            if (countries && countries.length > 0) {
+                // Limpiar opciones existentes excepto la primera
+                countrySelect.innerHTML = '<option value="">Seleccionar país...</option>';
+                
+                // Agregar países al selector
+                countries.forEach(country => {
+                    const option = document.createElement('option');
+                    option.value = country.id;
+                    option.textContent = country.name;
+                    countrySelect.appendChild(option);
+                });
+            }
+        } catch (error) {
+            console.error('Error cargando países:', error);
+        }
     }
 
     disableFrm = (estado) => {
         const frmRegistro = document.querySelector('#frmDataRegion');
         frmRegistro.elements['name'].value = '';
+        frmRegistro.elements['countryId'].value = '';
         frmRegistro.elements['name'].disabled = estado;
+        frmRegistro.elements['countryId'].disabled = estado;
     }
 }
 

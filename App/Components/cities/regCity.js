@@ -1,14 +1,19 @@
 import { postCities, patchCities, deleteCities } from '../../../Apis/city/cityApi.js';
+import { getRegions } from '../../../Apis/region/regionApi.js';
 
 export class RegCity extends HTMLElement {
     constructor() {
         super();
         this.render();
-        this.saveData();
-        this.enabledBtns();
-        this.eventoEditar();
-        this.eventoEliminar();
-        this.disableFrm(true);
+        // Usar setTimeout para asegurar que el DOM esté listo
+        setTimeout(() => {
+            this.loadRegions();
+            this.saveData();
+            this.enabledBtns();
+            this.eventoEditar();
+            this.eventoEliminar();
+            this.disableFrm(true);
+        }, 0);
     }
 
     render() {
@@ -26,6 +31,12 @@ export class RegCity extends HTMLElement {
                             <div class="col">
                                 <label for="name" class="form-label">Nombre de la Ciudad</label>
                                 <input type="text" class="form-control" id="name" name="name">
+                            </div>
+                            <div class="col">
+                                <label for="regionId" class="form-label">Región</label>
+                                <select class="form-control" id="regionId" name="regionId">
+                                    <option value="">Seleccionar región...</option>
+                                </select>
                             </div>
                         </div>
                         <div class="row mt-3">
@@ -196,14 +207,39 @@ export class RegCity extends HTMLElement {
     fillForm = (city) => {
         const frmRegistro = document.querySelector('#frmDataCity');
         frmRegistro.elements['name'].value = city.name;
+        frmRegistro.elements['regionId'].value = city.regionId || '';
         this.viewData(city.id);
         this.disableFrm(false);
+    }
+
+    loadRegions = async () => {
+        try {
+            const regions = await getRegions();
+            const regionSelect = document.querySelector('#regionId');
+            
+            if (regions && regions.length > 0) {
+                // Limpiar opciones existentes excepto la primera
+                regionSelect.innerHTML = '<option value="">Seleccionar región...</option>';
+                
+                // Agregar regiones al selector
+                regions.forEach(region => {
+                    const option = document.createElement('option');
+                    option.value = region.id;
+                    option.textContent = region.name;
+                    regionSelect.appendChild(option);
+                });
+            }
+        } catch (error) {
+            console.error('Error cargando regiones:', error);
+        }
     }
 
     disableFrm = (estado) => {
         const frmRegistro = document.querySelector('#frmDataCity');
         frmRegistro.elements['name'].value = '';
+        frmRegistro.elements['regionId'].value = '';
         frmRegistro.elements['name'].disabled = estado;
+        frmRegistro.elements['regionId'].disabled = estado;
     }
 }
 

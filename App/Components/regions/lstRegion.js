@@ -1,4 +1,5 @@
 import { getRegions, deleteRegions } from '../../../Apis/region/regionApi.js';
+import { getCountries } from '../../../Apis/country/countryApi.js';
 
 export class LstRegion extends HTMLElement {
     constructor() {
@@ -18,11 +19,12 @@ export class LstRegion extends HTMLElement {
                             <tr>
                                 <th>ID</th>
                                 <th>Nombre</th>
+                                <th>País</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="tablaRegions">
-                            <tr><td colspan="3" class="text-center">Cargando...</td></tr>
+                            <tr><td colspan="4" class="text-center">Cargando...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -34,34 +36,49 @@ export class LstRegion extends HTMLElement {
     }
 
     async loadRegions() {
-        const regions = await getRegions();
-        const tabla = this.querySelector('#tablaRegions');
-        
-        if (regions && regions.length > 0) {
-            let filas = '';
-            regions.forEach(region => {
-                filas += `
-                    <tr>
-                        <td>${region.id}</td>
-                        <td>${region.name}</td>
-                        <td>
-                            <button class="btn btn-sm btn-warning edit-region" data-id="${region.id}">Editar</button>
-                            <button class="btn btn-sm btn-danger delete-region" data-id="${region.id}">Eliminar</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            tabla.innerHTML = filas;
+        try {
+            const [regions, countries] = await Promise.all([
+                getRegions(),
+                getCountries()
+            ]);
+            
+            const tabla = this.querySelector('#tablaRegions');
+            
+            if (regions && regions.length > 0) {
+                let filas = '';
+                regions.forEach(region => {
+                    // Buscar el nombre del país
+                    const country = countries.find(c => c.id === region.countryId);
+                    const countryName = country ? country.name : 'No asignado';
+                    
+                    filas += `
+                        <tr>
+                            <td>${region.id}</td>
+                            <td>${region.name}</td>
+                            <td>${countryName}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning edit-region" data-id="${region.id}">Editar</button>
+                                <button class="btn btn-sm btn-danger delete-region" data-id="${region.id}">Eliminar</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tabla.innerHTML = filas;
 
-            tabla.querySelectorAll('.edit-region').forEach(btn => {
-                btn.addEventListener('click', (e) => this.editRegion(e.target.dataset.id));
-            });
+                tabla.querySelectorAll('.edit-region').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.editRegion(e.target.dataset.id));
+                });
 
-            tabla.querySelectorAll('.delete-region').forEach(btn => {
-                btn.addEventListener('click', (e) => this.deleteRegion(e.target.dataset.id));
-            });
-        } else {
-            tabla.innerHTML = '<tr><td colspan="3" class="text-center">No hay regiones registradas</td></tr>';
+                tabla.querySelectorAll('.delete-region').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.deleteRegion(e.target.dataset.id));
+                });
+            } else {
+                tabla.innerHTML = '<tr><td colspan="4" class="text-center">No hay regiones registradas</td></tr>';
+            }
+        } catch (error) {
+            console.error('Error cargando regiones:', error);
+            const tabla = this.querySelector('#tablaRegions');
+            tabla.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Error al cargar las regiones</td></tr>';
         }
     }
 

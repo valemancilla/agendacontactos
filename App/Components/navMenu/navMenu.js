@@ -20,19 +20,19 @@ export class NavMenu extends HTMLElement{
                     <a class="nav-link active" aria-current="page" href="#" data-verocultar='["c"]'>Contactos</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="#" data-verocultar='["countries"]'>Countries</a>
+                    <a class="nav-link" href="#" data-verocultar='["countries"]'>Países</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="#" data-verocultar='["cities"]'>Cities</a>
+                    <a class="nav-link" href="#" data-verocultar='["regions"]'>Regiones</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="#" data-verocultar='["regions"]'>Regions</a>
+                    <a class="nav-link" href="#" data-verocultar='["cities"]'>Ciudades</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="#" data-verocultar='["companies"]'>Companies</a>
+                    <a class="nav-link" href="#" data-verocultar='["companies"]'>Empresas</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="#" data-verocultar='["branches"]'>Branches</a>
+                    <a class="nav-link" href="#" data-verocultar='["branches"]'>Sucursales</a>
                   </li>
                 </ul>
               </div>
