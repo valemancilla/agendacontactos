@@ -45,7 +45,7 @@ export class RegCity extends HTMLElement {
                                     <a href="#" class="btn btn-primary" id="btnNuevo" data-ed='[["#btnGuardar","#btnCancelar"],["#btnNuevo","#btnEditar","#btnEliminar"]]'>Nuevo</a>
                                     <a href="#" class="btn btn-dark" id="btnCancelar" data-ed='[["#btnNuevo"],["#btnGuardar","#btnEditar","#btnEliminar","#btnCancelar"]]'>Cancelar</a>
                                     <a href="#" class="btn btn-success" id="btnGuardar" data-ed='[["#btnEditar","#btnCancelar","#btnNuevo","#btnEliminar"],["#btnGuardar"]]'>Guardar</a>
-                                    <a href="#" class="btn btn-warning" id="btnEditar" data-ed='[[],[]]'>Editar</a>
+                                    <a href="#" class="btn btn-warning" id="btnEditar" data-ed='[["#btnGuardar","#btnCancelar"],["#btnNuevo","#btnEliminar"]]'>Editar</a>
                                     <a href="#" class="btn btn-danger" id="btnEliminar" data-ed='[["#btnNuevo"],["#btnGuardar","#btnEditar","#btnEliminar","#btnCancelar"]]'>Eliminar</a>
                                 </div>
                             </div>
@@ -73,7 +73,9 @@ export class RegCity extends HTMLElement {
 
     eventoEditar = () => {
         document.querySelector('#btnEditar').addEventListener("click", (e) => {
-            this.editData();
+            // Activar botones Guardar y Cancelar, desactivar Nuevo y Eliminar
+            this.ctrlBtn(e.target.dataset.ed);
+            this.disableFrm(false); // Habilitar el formulario para edición
             e.stopImmediatePropagation();
             e.preventDefault();        
         });
@@ -92,10 +94,12 @@ export class RegCity extends HTMLElement {
         data[0].forEach(boton => {
             let btnActual = document.querySelector(boton);
             btnActual.classList.remove('disabled');
+            btnActual.removeAttribute('disabled');
         });
         data[1].forEach(boton => {
             let btnActual = document.querySelector(boton);
             btnActual.classList.add('disabled');
+            btnActual.setAttribute('disabled', 'disabled');
         });
     }
 
@@ -170,28 +174,69 @@ export class RegCity extends HTMLElement {
                 e.preventDefault();
                 
                 const datos = Object.fromEntries(new FormData(frmRegistro).entries());
-                console.log('Guardando ciudad:', datos);
+                console.log('📤 Guardando ciudad:', datos);
                 
-                postCities(datos)
-                    .then(response => {
-                        if (response.ok) {
-                            return response.json();
-                        } else {
-                            throw new Error(`Error en la solicitud POST: ${response.status} - ${response.statusText}`);
-                        }
-                    })
-                    .then(responseData => {
-                        console.log('Ciudad guardada exitosamente:', responseData);
-                        this.viewData(responseData.id);
-                        this.disableFrm(true);
-                        this.ctrlBtn(e.target.dataset.ed);
-                        // Disparar evento para actualizar listado
-                        window.dispatchEvent(new CustomEvent('citySaved', { detail: responseData }));
-                    })
-                    .catch(error => {
-                        console.error('Error al crear ciudad:', error.message);
-                        alert('Error al crear la ciudad: ' + error.message);
-                    });
+                // Validar que el nombre no esté vacío
+                if (!datos.name || datos.name.trim() === '') {
+                    alert('El nombre de la ciudad es requerido');
+                    return;
+                }
+                
+                // Verificar si está en modo edición (hay un ID en el badge)
+                const idView = document.querySelector('#idView');
+                const currentId = idView.textContent.trim();
+                
+                if (currentId) {
+                    // Modo edición - usar PATCH
+                    console.log('📝 Modo edición - actualizando ciudad ID:', currentId);
+                    patchCities(currentId, datos)
+                        .then(response => {
+                            console.log('📡 Respuesta del servidor (PATCH):', response);
+                            console.log('📊 Status:', response.status);
+                            console.log('📊 StatusText:', response.statusText);
+                            
+                            if (response.ok) {
+                                this.resetIdView();
+                                this.disableFrm(true);
+                                this.ctrlBtn(document.querySelector('#btnNuevo').dataset.ed);
+                                // Disparar evento para actualizar listado
+                                window.dispatchEvent(new CustomEvent('cityUpdated', { detail: { id: currentId, datos } }));
+                            } else {
+                                throw new Error(`Error en la solicitud PATCH: ${response.status} - ${response.statusText}`);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error al actualizar ciudad:', error);
+                            alert('Error al actualizar la ciudad: ' + error.message);
+                        });
+                } else {
+                    // Modo creación - usar POST
+                    console.log('➕ Modo creación - creando nueva ciudad');
+                    postCities(datos)
+                        .then(response => {
+                            console.log('📡 Respuesta del servidor (POST):', response);
+                            console.log('📊 Status:', response.status);
+                            console.log('📊 StatusText:', response.statusText);
+                            
+                            if (response.ok) {
+                                return response.json();
+                            } else {
+                                throw new Error(`Error en la solicitud POST: ${response.status} - ${response.statusText}`);
+                            }
+                        })
+                        .then(responseData => {
+                            console.log('Ciudad guardada exitosamente:', responseData);
+                            this.viewData(responseData.id);
+                            this.disableFrm(true);
+                            this.ctrlBtn(e.target.dataset.ed);
+                            // Disparar evento para actualizar listado
+                            window.dispatchEvent(new CustomEvent('citySaved', { detail: responseData }));
+                        })
+                        .catch(error => {
+                            console.error('Error al crear ciudad:', error.message);
+                            alert('Error al crear la ciudad: ' + error.message);
+                        });
+                }
             } catch (error) {
                 console.error('Error en saveData:', error);
                 alert('Error inesperado: ' + error.message);
@@ -210,6 +255,12 @@ export class RegCity extends HTMLElement {
         frmRegistro.elements['regionId'].value = city.regionId || '';
         this.viewData(city.id);
         this.disableFrm(false);
+        
+        // Activar botones de edición (Guardar y Cancelar)
+        const btnEditar = document.querySelector('#btnEditar');
+        if (btnEditar) {
+            this.ctrlBtn(btnEditar.dataset.ed);
+        }
     }
 
     loadRegions = async () => {

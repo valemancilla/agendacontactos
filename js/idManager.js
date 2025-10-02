@@ -6,7 +6,12 @@ class IdManager {
             if (response.ok) {
                 const data = await response.json();
                 // Encontrar el ID más alto y sumar 1
-                const maxId = data.length > 0 ? Math.max(...data.map(item => parseInt(item.id) || 0)) : 0;
+                // Convertir todos los IDs a números y encontrar el máximo
+                const numericIds = data.map(item => {
+                    const id = parseInt(item.id);
+                    return isNaN(id) ? 0 : id;
+                });
+                const maxId = numericIds.length > 0 ? Math.max(...numericIds) : 0;
                 return (maxId + 1).toString();
             }
             return "1";
@@ -19,6 +24,7 @@ class IdManager {
     static async createWithSequentialId(endpoint, data) {
         try {
             const nextId = await this.getNextId(endpoint);
+            console.log(`🔢 Generando ID secuencial para ${endpoint}: ${nextId}`);
             const dataWithId = { ...data, id: nextId };
             
             const response = await fetch(`http://localhost:3000/${endpoint}`, {

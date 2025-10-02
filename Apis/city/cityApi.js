@@ -27,10 +27,11 @@ const postCities = async (datos) => {
         return await IdManager.createWithSequentialId('cities', datos);
     } catch (error) {
         console.error('Error en la solicitud POST:', error.message);
+        throw error;
     }
 }
 
-const patchCities = async (datos,id) =>{
+const patchCities = async (id, datos) =>{
     try {
         return await fetch(`${URL_API}/${id}`, {
             method: "PATCH",

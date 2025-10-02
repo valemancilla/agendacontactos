@@ -27,10 +27,11 @@ const postBranches = async (datos) => {
         return await IdManager.createWithSequentialId('branches', datos);
     } catch (error) {
         console.error('Error en la solicitud POST:', error.message);
+        throw error;
     }
 }
 
-const patchBranches = async (datos,id) =>{
+const patchBranches = async (id, datos) =>{
     try {
         return await fetch(`${URL_API}/${id}`, {
             method: "PATCH",
