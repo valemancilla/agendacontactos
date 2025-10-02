@@ -17,10 +17,7 @@ export class NavMenu extends HTMLElement{
               <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                   <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#" data-verocultar='["c"]'>Contactos</a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="#" data-verocultar='["countries"]'>Países</a>
+                    <a class="nav-link active" aria-current="page" href="#" data-verocultar='["countries"]'>Países</a>
                   </li>
                   <li class="nav-item">
                     <a class="nav-link" href="#" data-verocultar='["regions"]'>Regiones</a>
@@ -45,9 +42,6 @@ export class NavMenu extends HTMLElement{
               let mainContent = document.querySelector('#mainContent');
               mainContent.innerHTML= "";
               switch (data[0]){
-                case 'c':
-                  mainContent.innerHTML="<contacto-component></contacto-component>";
-                  break;
                 case 'countries':
                   mainContent.innerHTML="<country-component></country-component>";
                   break;

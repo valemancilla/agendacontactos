@@ -1,47 +1,6 @@
 {
-  "contacts": [
-    {
-      "id": "1",
-      "nombreContacto": "Juan",
-      "apellidoContacto": "Pérez",
-      "nroCelular": "3001234567",
-      "emailContacto": "juan.perez@email.com",
-      "nroResidencia": "Calle 123 #45-67"
-    },
-    {
-      "id": "2",
-      "nombreContacto": "María",
-      "apellidoContacto": "González",
-      "nroCelular": "3109876543",
-      "emailContacto": "maria.gonzalez@email.com",
-      "nroResidencia": "Carrera 89 #12-34"
-    },
-    {
-      "id": "3",
-      "nombreContacto": "Carlos",
-      "apellidoContacto": "Rodríguez",
-      "nroCelular": "3155555555",
-      "emailContacto": "carlos.rodriguez@email.com",
-      "nroResidencia": "Avenida 15 #78-90"
-    }
-  ],
-  "countries": [
-    {
-      "id": "1",
-      "name": "colombia"
-    },
-    {
-      "id": "2",
-      "name": "venezuela"
-    }
-  ],
-  "regions": [
-    {
-      "id": "1",
-      "name": "santander",
-      "countryId": "2"
-    }
-  ],
+  "countries": [],
+  "regions": [],
   "cities": [],
   "companies": [],
   "branches": []

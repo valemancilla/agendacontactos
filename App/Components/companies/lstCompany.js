@@ -1,4 +1,5 @@
 import { getCompanies, deleteCompanies } from '../../../Apis/company/companyApi.js';
+import { getCountries } from '../../../Apis/country/countryApi.js';
 
 export class LstCompany extends HTMLElement {
     constructor() {
@@ -20,11 +21,12 @@ export class LstCompany extends HTMLElement {
                                 <th>Nombre</th>
                                 <th>UKNiu</th>
                                 <th>Email</th>
+                                <th>País</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="tablaCompanies">
-                            <tr><td colspan="5" class="text-center">Cargando...</td></tr>
+                            <tr><td colspan="6" class="text-center">Cargando...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -36,36 +38,51 @@ export class LstCompany extends HTMLElement {
     }
 
     async loadCompanies() {
-        const companies = await getCompanies();
-        const tabla = this.querySelector('#tablaCompanies');
-        
-        if (companies && companies.length > 0) {
-            let filas = '';
-            companies.forEach(company => {
-                filas += `
-                    <tr>
-                        <td>${company.id}</td>
-                        <td>${company.name}</td>
-                        <td>${company.UKNiu}</td>
-                        <td>${company.email || 'N/A'}</td>
-                        <td>
-                            <button class="btn btn-sm btn-warning edit-company" data-id="${company.id}">Editar</button>
-                            <button class="btn btn-sm btn-danger delete-company" data-id="${company.id}">Eliminar</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            tabla.innerHTML = filas;
+        try {
+            const [companies, countries] = await Promise.all([
+                getCompanies(),
+                getCountries()
+            ]);
+            
+            const tabla = this.querySelector('#tablaCompanies');
+            
+            if (companies && companies.length > 0) {
+                let filas = '';
+                companies.forEach(company => {
+                    // Buscar el nombre del país
+                    const country = countries.find(c => c.id === company.countryId);
+                    const countryName = country ? country.name : 'No asignado';
+                    
+                    filas += `
+                        <tr>
+                            <td>${company.id}</td>
+                            <td>${company.name}</td>
+                            <td>${company.UKNiu}</td>
+                            <td>${company.email || 'N/A'}</td>
+                            <td>${countryName}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning edit-company" data-id="${company.id}">Editar</button>
+                                <button class="btn btn-sm btn-danger delete-company" data-id="${company.id}">Eliminar</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tabla.innerHTML = filas;
 
-            tabla.querySelectorAll('.edit-company').forEach(btn => {
-                btn.addEventListener('click', (e) => this.editCompany(e.target.dataset.id));
-            });
+                tabla.querySelectorAll('.edit-company').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.editCompany(e.target.dataset.id));
+                });
 
-            tabla.querySelectorAll('.delete-company').forEach(btn => {
-                btn.addEventListener('click', (e) => this.deleteCompany(e.target.dataset.id));
-            });
-        } else {
-            tabla.innerHTML = '<tr><td colspan="5" class="text-center">No hay empresas registradas</td></tr>';
+                tabla.querySelectorAll('.delete-company').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.deleteCompany(e.target.dataset.id));
+                });
+            } else {
+                tabla.innerHTML = '<tr><td colspan="6" class="text-center">No hay empresas registradas</td></tr>';
+            }
+        } catch (error) {
+            console.error('Error cargando empresas:', error);
+            const tabla = this.querySelector('#tablaCompanies');
+            tabla.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error al cargar las empresas</td></tr>';
         }
     }
 

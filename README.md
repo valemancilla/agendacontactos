@@ -1,10 +1,10 @@
-# 📋 Sistema de Gestión de Contactos y Entidades
+# 📋 Sistema de Gestión de Entidades Empresariales
 
 ## 📖 Descripción del Proyecto
 
-Este es un sistema completo de gestión que permite administrar contactos, países, regiones, ciudades, empresas y sucursales. La aplicación está construida como una Single Page Application (SPA) que utiliza tecnologías web modernas para proporcionar una experiencia de usuario fluida e intuitiva.
+Este es un sistema completo de gestión que permite administrar países, regiones, ciudades, empresas y sucursales. La aplicación está construida como una Single Page Application (SPA) que utiliza tecnologías web modernas para proporcionar una experiencia de usuario fluida e intuitiva.
 
-El sistema está diseñado para manejar relaciones jerárquicas entre diferentes entidades, permitiendo una organización estructurada de la información empresarial y de contactos.
+El sistema está diseñado para manejar relaciones jerárquicas entre diferentes entidades, permitiendo una organización estructurada de la información empresarial.
 
 ## ⭐ Características Destacadas
 
@@ -19,7 +19,6 @@ El sistema está diseñado para manejar relaciones jerárquicas entre diferentes
 ## 🎯 Objetivo
 
 Crear una aplicación web que permita:
-- Gestionar información de contactos personales y empresariales
 - Organizar datos geográficos de manera jerárquica (Países → Regiones → Ciudades)
 - Administrar empresas y sus sucursales
 - Mantener relaciones entre todas las entidades del sistema
@@ -50,7 +49,6 @@ agendacontactos/
 │   ├── 📁 branch/                    # API de sucursales
 │   ├── 📁 city/                      # API de ciudades
 │   ├── 📁 company/                   # API de empresas
-│   ├── 📁 contact/                   # API de contactos
 │   ├── 📁 country/                   # API de países
 │   └── 📁 region/                    # API de regiones
 ├── 📁 App/                           # Componentes principales
@@ -58,7 +56,6 @@ agendacontactos/
 │       ├── 📁 branches/              # Componentes de sucursales
 │       ├── 📁 cities/                # Componentes de ciudades
 │       ├── 📁 companies/             # Componentes de empresas
-│       ├── 📁 contacto/              # Componentes de contactos
 │       ├── 📁 countries/             # Componentes de países
 │       ├── 📁 navMenu/               # Menú de navegación
 │       └── 📁 regions/               # Componentes de regiones
@@ -88,16 +85,13 @@ agendacontactos/
 
 #### `db.json`
 - **Propósito**: Base de datos de la aplicación
-- **Contiene**: Datos de contactos, países, regiones, ciudades, empresas y sucursales
+- **Contiene**: Datos de países, regiones, ciudades, empresas y sucursales
 - **Función**: Almacenamiento persistente de la información
 
 ### 📁 Carpeta Apis/
 
 Cada API maneja las operaciones CRUD para su entidad correspondiente:
 
-#### `contactApi.js`
-- **Operaciones**: GET, POST, PATCH, DELETE para contactos
-- **URL**: `http://localhost:3000/contacts`
 
 #### `countryApi.js`
 - **Operaciones**: GET, POST, PATCH, DELETE para países
@@ -126,11 +120,6 @@ Cada API maneja las operaciones CRUD para su entidad correspondiente:
 
 Cada módulo tiene la misma estructura de componentes:
 
-#### Componentes de Contacto (`contacto/`)
-- **`contactoComponent.js`**: Componente principal con pestañas
-- **`regContacto.js`**: Formulario de registro y edición
-- **`lstContacto.js`**: Lista de contactos con funcionalidad de edición
-- **`contactoStyle.css`**: Estilos específicos del módulo
 
 #### Componentes de Países (`countries/`)
 - **`countryComponent.js`**: Componente principal con pestañas
@@ -168,8 +157,6 @@ Cada módulo tiene la misma estructura de componentes:
 
 ### 📁 Carpeta Models/
 
-#### `contactModel.js`
-- **Propósito**: Define la estructura de datos para contactos
 - **Campos**: nombre, apellido, celular, email, residencia
 
 #### `countryModel.js`

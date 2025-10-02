@@ -1,14 +1,19 @@
 import { postCompanies, patchCompanies, deleteCompanies } from '../../../Apis/company/companyApi.js';
+import { getCountries } from '../../../Apis/country/countryApi.js';
 
 export class RegCompany extends HTMLElement {
     constructor() {
         super();
         this.render();
-        this.saveData();
-        this.enabledBtns();
-        this.eventoEditar();
-        this.eventoEliminar();
-        this.disableFrm(true);
+        // Usar setTimeout para asegurar que el DOM esté listo
+        setTimeout(() => {
+            this.loadCountries();
+            this.saveData();
+            this.enabledBtns();
+            this.eventoEditar();
+            this.eventoEliminar();
+            this.disableFrm(true);
+        }, 0);
     }
 
     render() {
@@ -40,6 +45,17 @@ export class RegCompany extends HTMLElement {
                             <div class="col">
                                 <label for="email" class="form-label">Email</label>
                                 <input type="email" class="form-control" id="email" name="email">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <label for="countryId" class="form-label">País</label>
+                                <select class="form-control" id="countryId" name="countryId">
+                                    <option value="">Seleccionar país...</option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <!-- Columna vacía para mantener el layout -->
                             </div>
                         </div>
                         <div class="row mt-3">
@@ -214,8 +230,31 @@ export class RegCompany extends HTMLElement {
         frmRegistro.elements['UKNiu'].value = company.UKNiu;
         frmRegistro.elements['address'].value = company.address;
         frmRegistro.elements['email'].value = company.email;
+        frmRegistro.elements['countryId'].value = company.countryId || '';
         this.viewData(company.id);
         this.disableFrm(false);
+    }
+
+    loadCountries = async () => {
+        try {
+            const countries = await getCountries();
+            const countrySelect = document.querySelector('#countryId');
+            
+            if (countries && countries.length > 0) {
+                // Limpiar opciones existentes excepto la primera
+                countrySelect.innerHTML = '<option value="">Seleccionar país...</option>';
+                
+                // Agregar países al selector
+                countries.forEach(country => {
+                    const option = document.createElement('option');
+                    option.value = country.id;
+                    option.textContent = country.name;
+                    countrySelect.appendChild(option);
+                });
+            }
+        } catch (error) {
+            console.error('Error cargando países:', error);
+        }
     }
 
     disableFrm = (estado) => {
@@ -224,10 +263,12 @@ export class RegCompany extends HTMLElement {
         frmRegistro.elements['UKNiu'].value = '';
         frmRegistro.elements['address'].value = '';
         frmRegistro.elements['email'].value = '';
+        frmRegistro.elements['countryId'].value = '';
         frmRegistro.elements['name'].disabled = estado;
         frmRegistro.elements['UKNiu'].disabled = estado;
         frmRegistro.elements['address'].disabled = estado;
         frmRegistro.elements['email'].disabled = estado;
+        frmRegistro.elements['countryId'].disabled = estado;
     }
 
 }
