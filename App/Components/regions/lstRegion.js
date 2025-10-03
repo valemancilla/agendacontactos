@@ -1,4 +1,4 @@
-import { getRegions, deleteRegions } from '../../../Apis/region/regionApi.js';
+import { getRegions, deleteRegions, patchRegions } from '../../../Apis/region/regionApi.js';
 import { getCountries } from '../../../Apis/country/countryApi.js';
 
 export class LstRegion extends HTMLElement {
@@ -52,7 +52,7 @@ export class LstRegion extends HTMLElement {
                     const countryName = country ? country.name : 'No asignado';
                     
                     filas += `
-                        <tr>
+                        <tr data-id="${region.id}">
                             <td>${region.id}</td>
                             <td>${region.name}</td>
                             <td>${countryName}</td>
@@ -83,20 +83,102 @@ export class LstRegion extends HTMLElement {
     }
 
     async editRegion(id) {
-        const regions = await getRegions();
-        const region = regions.find(r => r.id == id);
-        
-        const regRegion = document.querySelector('reg-region');
-        if (regRegion) {
-            regRegion.fillForm(region);
-            document.querySelector('.mnuregion[data-verocultar*="#regRegion"]').click();
+        try {
+            const [regions, countries] = await Promise.all([
+                getRegions(),
+                getCountries()
+            ]);
+            const region = regions.find(r => r.id == id);
+            
+            // Encontrar la fila correspondiente en la tabla
+            const fila = this.querySelector(`tr[data-id="${id}"]`);
+            if (fila) {
+                // Cambiar las celdas a modo edición
+                const celdaNombre = fila.querySelector('td:nth-child(2)');
+                const celdaPais = fila.querySelector('td:nth-child(3)');
+                const nombreOriginal = region.name;
+                const paisOriginal = region.countryId;
+                
+                celdaNombre.innerHTML = `
+                    <input type="text" class="form-control form-control-sm" value="${nombreOriginal}" 
+                           data-original="${nombreOriginal}" id="edit-name-${id}">
+                `;
+                
+                // Crear select para países
+                let optionsHtml = '<option value="">Seleccionar país...</option>';
+                countries.forEach(country => {
+                    const selected = country.id === paisOriginal ? 'selected' : '';
+                    optionsHtml += `<option value="${country.id}" ${selected}>${country.name}</option>`;
+                });
+                
+                celdaPais.innerHTML = `
+                    <select class="form-control form-control-sm" id="edit-country-${id}" data-original="${paisOriginal}">
+                        ${optionsHtml}
+                    </select>
+                `;
+                
+                // Cambiar los botones de acción
+                const celdaAcciones = fila.querySelector('td:nth-child(4)');
+                celdaAcciones.innerHTML = `
+                    <button class="btn btn-sm btn-success save-region" data-id="${id}">Guardar</button>
+                    <button class="btn btn-sm btn-secondary cancel-edit" data-id="${id}">Cancelar</button>
+                `;
+                
+                // Agregar event listeners a los nuevos botones
+                this.querySelector(`.save-region[data-id="${id}"]`).addEventListener('click', (e) => this.saveRegion(e.target.dataset.id));
+                this.querySelector(`.cancel-edit[data-id="${id}"]`).addEventListener('click', (e) => this.cancelEdit(e.target.dataset.id));
+                
+                // Enfocar el input
+                this.querySelector(`#edit-name-${id}`).focus();
+            }
+        } catch (error) {
+            console.error('Error al obtener región:', error);
+            alert('Error al obtener la región');
         }
     }
 
+    async saveRegion(id) {
+        try {
+            const inputNombre = this.querySelector(`#edit-name-${id}`);
+            const selectPais = this.querySelector(`#edit-country-${id}`);
+            const nuevoNombre = inputNombre.value.trim();
+            const nuevoPaisId = selectPais.value;
+            
+            if (!nuevoNombre) {
+                alert('El nombre de la región no puede estar vacío');
+                return;
+            }
+            
+            // Actualizar la región
+            const response = await patchRegions(id, { name: nuevoNombre, countryId: nuevoPaisId });
+            if (response.ok) {
+                // Recargar la tabla para mostrar los cambios
+                this.loadRegions();
+            } else {
+                throw new Error(`Error ${response.status}: ${response.statusText}`);
+            }
+        } catch (error) {
+            console.error('Error al guardar región:', error);
+            alert('Error al guardar la región: ' + error.message);
+        }
+    }
+
+    cancelEdit(id) {
+        // Recargar la tabla para volver al estado normal
+        this.loadRegions();
+    }
+
     async deleteRegion(id) {
-        const response = await deleteRegions(id);
-        if (response.ok) {
-            this.loadRegions();
+        try {
+            const response = await deleteRegions(id);
+            if (response.ok) {
+                this.loadRegions();
+            } else {
+                throw new Error(`Error ${response.status}: ${response.statusText}`);
+            }
+        } catch (error) {
+            console.error('Error al eliminar región:', error);
+            alert('Error al eliminar la región: ' + error.message);
         }
     }
 

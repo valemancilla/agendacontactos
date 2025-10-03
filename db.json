@@ -1,12 +1,6 @@
 {
   "countries": [],
-  "regions": [
-    {
-      "id": "1",
-      "name": "españa",
-      "countryId": ""
-    }
-  ],
+  "regions": [],
   "cities": [],
   "companies": [],
   "branches": []

@@ -1,19 +1,24 @@
-import { postCountries, patchCountries, deleteCountries } from '../../../Apis/country/countryApi.js';
+// ========================================
+// COMPONENTE DE REGISTRO DE PAÍSES
+// ========================================
+// Este componente maneja el formulario para crear y editar países
+
+import { postCountries, patchCountries } from '../../../Apis/country/countryApi.js';
 
 export class RegCountry extends HTMLElement {
+    // Constructor del componente
     constructor() {
         super();
-        this.render();
+        this.render(); // Crear el HTML del formulario
         // Usar setTimeout para asegurar que el DOM esté listo
         setTimeout(() => {
-            this.saveData();
-            this.enabledBtns();
-            this.eventoEditar();
-            this.eventoEliminar();
-            this.disableFrm(true);
+            this.saveData();        // Configurar eventos de guardado
+            window.enabledBtns();   // Activar botones
+            this.disableFrm(true);  // Deshabilitar formulario inicialmente
         }, 0);
     }
 
+    // Función que crea el HTML del formulario
     render() {
         this.innerHTML = /* html */ `
             <style rel="stylesheet">
@@ -27,18 +32,16 @@ export class RegCountry extends HTMLElement {
                     <form id="frmDataCountry">
                         <div class="row">
                             <div class="col">
-                                <label for="name" class="form-label">Nombre del País</label>
+                                <label for="name" class="form-label">Nombre del País <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="name" name="name">
                             </div>
                         </div>
                         <div class="row mt-3">
                             <div class="col">
                                 <div class="container mt-4 text-center">
-                                    <a href="#" class="btn btn-primary" id="btnNuevo" data-ed='[["#btnGuardar","#btnCancelar"],["#btnNuevo","#btnEditar","#btnEliminar"]]'>Nuevo</a>
-                                    <a href="#" class="btn btn-dark" id="btnCancelar" data-ed='[["#btnNuevo"],["#btnGuardar","#btnEditar","#btnEliminar","#btnCancelar"]]'>Cancelar</a>
-                                    <a href="#" class="btn btn-success" id="btnGuardar" data-ed='[["#btnEditar","#btnCancelar","#btnNuevo","#btnEliminar"],["#btnGuardar"]]'>Guardar</a>
-                                    <a href="#" class="btn btn-warning" id="btnEditar" data-ed='[["#btnGuardar","#btnCancelar"],["#btnNuevo","#btnEliminar"]]'>Editar</a>
-                                    <a href="#" class="btn btn-danger" id="btnEliminar" data-ed='[["#btnNuevo"],["#btnGuardar","#btnEditar","#btnEliminar","#btnCancelar"]]'>Eliminar</a>
+                                    <a href="#" class="btn btn-primary" id="btnNuevo" data-ed='[["#btnGuardar","#btnCancelar"],["#btnNuevo"]]'>Nuevo</a>
+                                    <a href="#" class="btn btn-dark" id="btnCancelar" data-ed='[["#btnNuevo"],["#btnGuardar","#btnCancelar"]]'>Cancelar</a>
+                                    <a href="#" class="btn btn-success" id="btnGuardar" data-ed='[["#btnCancelar","#btnNuevo"],["#btnGuardar"]]'>Guardar</a>
                                 </div>
                             </div>
                         </div> 
@@ -46,218 +49,110 @@ export class RegCountry extends HTMLElement {
                 </div>
             </div>
         `;
+        // Configurar evento del botón "Nuevo"
         this.querySelector("#btnNuevo").addEventListener("click", (e) => {
-            this.ctrlBtn(e.target.dataset.ed);
-            this.resetIdView();
-            this.disableFrm(false);
+            window.ctrlBtn(e.target.dataset.ed); // Activar/desactivar botones
+            window.resetIdView();                // Limpiar ID mostrado
+            this.disableFrm(false);              // Habilitar formulario
         })
+        
+        // Configurar evento del botón "Cancelar"
         this.querySelector("#btnCancelar").addEventListener("click", (e) => {
-            this.ctrlBtn(e.target.dataset.ed);
-            this.resetIdView();
-            this.disableFrm(true);
-        })
-    }
-
-    resetIdView = () => {
-        const idView = document.querySelector('#idView');
-        idView.innerHTML = '';   
-    }
-
-    eventoEditar = () => {
-        document.querySelector('#btnEditar').addEventListener("click", (e) => {
-            console.log('🖱️ Botón Editar clickeado');
-            console.log('📋 Data-ed:', e.target.dataset.ed);
-            
-            // Activar botones Guardar y Cancelar, desactivar Nuevo y Eliminar
-            this.ctrlBtn(e.target.dataset.ed);
-            this.disableFrm(false); // Habilitar el formulario para edición
-            
-            console.log('✅ Botones actualizados');
-            e.stopImmediatePropagation();
-            e.preventDefault();        
-        });
-    }
-
-    eventoEliminar = () => {
-        document.querySelector('#btnEliminar').addEventListener("click", (e) => {
-            this.delData();
-            e.stopImmediatePropagation();
-            e.preventDefault();        
-        });
-    }
-
-    ctrlBtn = (e) => {
-        let data = JSON.parse(e);
-        console.log('🔧 Activando botones:', data[0]);
-        console.log('🔧 Desactivando botones:', data[1]);
-        
-        data[0].forEach(boton => {
-            let btnActual = document.querySelector(boton);
-            if (btnActual) {
-                btnActual.classList.remove('disabled');
-                btnActual.removeAttribute('disabled');
-                console.log('✅ Activado:', boton);
-            } else {
-                console.log('❌ No encontrado:', boton);
-            }
-        });
-        data[1].forEach(boton => {
-            let btnActual = document.querySelector(boton);
-            if (btnActual) {
-                btnActual.classList.add('disabled');
-                btnActual.setAttribute('disabled', 'disabled');
-                console.log('❌ Desactivado:', boton);
-            } else {
-                console.log('❌ No encontrado:', boton);
-            }
-        });
-    }
-
-    enabledBtns = () => {
-        document.querySelectorAll(".btn").forEach((val, id) => {
-            this.ctrlBtn(val.dataset.ed);
+            window.ctrlBtn(e.target.dataset.ed); // Activar/desactivar botones
+            window.resetIdView();                // Limpiar ID mostrado
+            this.disableFrm(true);               // Deshabilitar formulario
         })
     }
 
 
-    delData = () => {
-        const idView = document.querySelector('#idView');
-        let id = idView.textContent;
-        
-        if (!id) {
-            alert('No hay país seleccionado para eliminar');
-            return;
-        }
 
 
-        deleteCountries(id)
-            .then(response => {
-                if (response.ok) {
-                    this.resetIdView();
-                    this.disableFrm(true);
-                    this.ctrlBtn(document.querySelector('#btnNuevo').dataset.ed);
-                    // Disparar evento para actualizar listado
-                    window.dispatchEvent(new CustomEvent('countryDeleted', { detail: { id } }));
-                } else {
-                    throw new Error(`Error ${response.status}: ${response.statusText}`);
-                }
-            })
-            .catch(error => {
-                console.error('Error al eliminar país:', error);
-                alert('Error al eliminar el país: ' + error.message);
-            });   
-    }
-
+    // Función que configura el evento de guardado
     saveData = () => {
         const frmRegistro = document.querySelector('#frmDataCountry');
         const btnGuardar = document.querySelector('#btnGuardar');
         
-        console.log('🔧 Configurando evento para botón guardar:', btnGuardar);
-        
+        // Verificar que el botón existe
         if (!btnGuardar) {
-            console.error('❌ No se encontró el botón guardar');
             return;
         }
         
+        // Configurar evento del botón "Guardar"
         btnGuardar.addEventListener("click", (e) => {
-            console.log('🖱️ Botón guardar clickeado');
             try {
                 e.stopImmediatePropagation();
                 e.preventDefault();
                 
+                // Obtener datos del formulario
                 const datos = Object.fromEntries(new FormData(frmRegistro).entries());
-                console.log('📤 Guardando país:', datos);
                 
                 // Validar que el nombre no esté vacío
                 if (!datos.name || datos.name.trim() === '') {
-                    alert('El nombre del país es requerido');
+                    alert('Complete todos los campos');
                     return;
                 }
                 
-                // Verificar si está en modo edición (hay un ID en el badge)
+                // Verificar si está editando (hay un ID en el badge)
                 const idView = document.querySelector('#idView');
                 const currentId = idView.textContent.trim();
                 
                 if (currentId) {
-                    // Modo edición - usar PATCH
-                    console.log('📝 Modo edición - actualizando país ID:', currentId);
+                    // MODO EDICIÓN: Actualizar país existente
                     patchCountries(currentId, datos)
                         .then(response => {
-                            console.log('📡 Respuesta del servidor (PATCH):', response);
-                            console.log('📊 Status:', response.status);
-                            console.log('📊 StatusText:', response.statusText);
-                            
                             if (response.ok) {
-                                this.resetIdView();
-                                this.disableFrm(true);
-                                this.ctrlBtn(document.querySelector('#btnNuevo').dataset.ed);
-                                // Disparar evento para actualizar listado
+                                window.resetIdView();                    // Limpiar ID mostrado
+                                this.disableFrm(true);                  // Deshabilitar formulario
+                                window.ctrlBtn(document.querySelector('#btnNuevo').dataset.ed); // Activar botón Nuevo
                                 window.dispatchEvent(new CustomEvent('countryUpdated', { detail: { id: currentId, datos } }));
                             } else {
-                                throw new Error(`Error en la solicitud PATCH: ${response.status} - ${response.statusText}`);
+                                throw new Error(`Error: ${response.status} - ${response.statusText}`);
                             }
                         })
                         .catch(error => {
-                            console.error('Error al actualizar país:', error);
-                            alert('Error al actualizar el país: ' + error.message);
+                            alert('Error al actualizar: ' + error.message);
                         });
                 } else {
-                    // Modo creación - usar POST
-                    console.log('➕ Modo creación - creando nuevo país');
+                    // MODO CREACIÓN: Crear nuevo país
                     postCountries(datos)
                         .then(response => {
-                            console.log('📡 Respuesta del servidor (POST):', response);
-                            console.log('📊 Status:', response.status);
-                            console.log('📊 StatusText:', response.statusText);
-                            
                             if (response.ok) {
                                 return response.json();
                             } else {
-                                throw new Error(`Error en la solicitud POST: ${response.status} - ${response.statusText}`);
+                                throw new Error(`Error: ${response.status} - ${response.statusText}`);
                             }
                         })
                         .then(responseData => {
-                            console.log('País guardado exitosamente:', responseData);
-                            this.viewData(responseData.id);
-                            this.disableFrm(true);
-                            this.ctrlBtn(e.target.dataset.ed);
-                            // Disparar evento para actualizar listado
+                            window.viewData(responseData.id);           // Mostrar ID del país creado
+                            this.disableFrm(true);                      // Deshabilitar formulario
+                            window.ctrlBtn(e.target.dataset.ed);        // Activar botón Nuevo
                             window.dispatchEvent(new CustomEvent('countrySaved', { detail: responseData }));
                         })
                         .catch(error => {
-                            console.error('Error al crear país:', error.message);
-                            alert('Error al crear el país: ' + error.message);
+                            alert('Error al crear: ' + error.message);
                         });
                 }
             } catch (error) {
-                console.error('Error en saveData:', error);
-                alert('Error inesperado: ' + error.message);
+                alert('Error: ' + error.message);
             }
         })
     }
 
-    viewData = (id) => {
-        const idView = document.querySelector('#idView');
-        idView.innerHTML = id;
-    }
 
+    // Función para llenar el formulario con datos de un país (modo edición)
+    // Recibe: objeto country con los datos del país
     fillForm = (country) => {
         const frmRegistro = document.querySelector('#frmDataCountry');
-        frmRegistro.elements['name'].value = country.name;
-        this.viewData(country.id);
-        this.disableFrm(false);
-        
-        // Activar botones de edición (Guardar y Cancelar)
-        const btnEditar = document.querySelector('#btnEditar');
-        if (btnEditar) {
-            this.ctrlBtn(btnEditar.dataset.ed);
-        }
+        frmRegistro.elements['name'].value = country.name;  // Llenar campo nombre
+        window.viewData(country.id);                        // Mostrar ID del país
+        this.disableFrm(false);                             // Habilitar formulario
+        window.ctrlBtn(document.querySelector('#btnGuardar').dataset.ed); // Activar botón Guardar
     }
 
+    // Función para habilitar/deshabilitar el formulario
+    // Recibe: estado (true para deshabilitar, false para habilitar)
     disableFrm = (estado) => {
-        const frmRegistro = document.querySelector('#frmDataCountry');
-        frmRegistro.elements['name'].value = '';
-        frmRegistro.elements['name'].disabled = estado;
+        window.disableFrm(estado, '#frmDataCountry');
     }
 }
 

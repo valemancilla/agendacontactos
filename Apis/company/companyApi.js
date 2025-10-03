@@ -1,57 +1,48 @@
-const URL_API = "http://localhost:3000/companies";
-const myHeaders = new Headers({
-    "Content-Type": "application/json"
-});
+// ========================================
+// API PARA EMPRESAS
+// ========================================
+// Este archivo contiene todas las funciones para manejar empresas
+// Se conecta con el servidor JSON para hacer operaciones CRUD
 
-const getCompanies = async() => {
-    try {
-        const respuesta = await fetch(URL_API);
-        if(respuesta.status === 200){
-            const datos = await respuesta.json();
-            return datos;
-        } else if(respuesta.status === 401){
-            console.log('La url no es correcta');
-        } else if(respuesta.status === 404){
-            console.log('La empresa no existe');
-        } else {
-            console.log('Se presentó un error en la petición consulte al Administrador');
-        } 
-    } catch(error){
-        console.error('Error al obtener empresas:', error);
-    }
+// URL del servidor para empresas
+const URL_API = "http://localhost:3001/companies";
+// Configuración de headers para las peticiones
+const headers = { "Content-Type": "application/json" };
+
+// Función para obtener todas las empresas del servidor
+// Devuelve: array con todas las empresas
+async function getCompanies() {
+    let response = await fetch(URL_API);
+    let companies = await response.json();
+    return companies;
 }
 
-const postCompanies = async (datos) => {
-    try {
-        // Usar el gestor de IDs para crear con ID secuencial
-        return await IdManager.createWithSequentialId('companies', datos);
-    } catch (error) {
-        console.error('Error en la solicitud POST:', error.message);
-        throw error;
-    }
+// Función para crear una nueva empresa
+// Recibe: datos de la empresa (nombre, UKNiu, dirección, etc.)
+// Devuelve: respuesta del servidor con la empresa creada
+async function postCompanies(datos) {
+    return await IdManager.createWithSequentialId('companies', datos);
 }
 
-const patchCompanies = async (id, datos) =>{
-    try {
-        return await fetch(`${URL_API}/${id}`, {
-            method: "PATCH",
-            headers: myHeaders,
-            body: JSON.stringify(datos)
-        });
-    } catch (error) {
-        console.error('Error en la solicitud PATCH:', error.message);
-    }
+// Función para actualizar una empresa existente
+// Recibe: id de la empresa y los nuevos datos
+// Devuelve: respuesta del servidor
+async function patchCompanies(id, datos) {
+    return await fetch(`${URL_API}/${id}`, {
+        method: "PATCH",
+        headers: headers,
+        body: JSON.stringify(datos)
+    });
 }
 
-const deleteCompanies = async (id) =>{
-    try {
-        return await fetch(`${URL_API}/${id}`, {
-            method: "DELETE",
-            headers: myHeaders,
-        });
-    } catch (error) {
-        console.error('Error en la solicitud DELETE:', error.message);
-    }
+// Función para eliminar una empresa
+// Recibe: id de la empresa a eliminar
+// Devuelve: respuesta del servidor
+async function deleteCompanies(id) {
+    return await fetch(`${URL_API}/${id}`, {
+        method: "DELETE",
+        headers: headers
+    });
 }
 
 export {

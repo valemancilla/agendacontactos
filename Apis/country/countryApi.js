@@ -1,57 +1,48 @@
-const URL_API = "http://localhost:3000/countries";
-const myHeaders = new Headers({
-    "Content-Type": "application/json"
-});
+// ========================================
+// API PARA PAÍSES
+// ========================================
+// Este archivo contiene todas las funciones para manejar países
+// Se conecta con el servidor JSON para hacer operaciones CRUD
 
-const getCountries = async() => {
-    try {
-        const respuesta = await fetch(URL_API);
-        if(respuesta.status === 200){
-            const datos = await respuesta.json();
-            return datos;
-        } else if(respuesta.status === 401){
-            console.log('La url no es correcta');
-        } else if(respuesta.status === 404){
-            console.log('El país no existe');
-        } else {
-            console.log('Se presentó un error en la petición consulte al Administrador');
-        } 
-    } catch(error){
-        console.error('Error al obtener países:', error);
-    }
+// URL del servidor para países
+const URL_API = "http://localhost:3001/countries";
+// Configuración de headers para las peticiones
+const headers = { "Content-Type": "application/json" };
+
+// Función para obtener todos los países del servidor
+// Devuelve: array con todos los países
+async function getCountries() {
+    let response = await fetch(URL_API);
+    let countries = await response.json();
+    return countries;
 }
 
-const postCountries = async (datos) => {
-    try {
-        // Usar el gestor de IDs para crear con ID secuencial
-        return await IdManager.createWithSequentialId('countries', datos);
-    } catch (error) {
-        console.error('Error en la solicitud POST:', error.message);
-        throw error;
-    }
+// Función para crear un nuevo país
+// Recibe: datos del país (nombre, etc.)
+// Devuelve: respuesta del servidor con el país creado
+async function postCountries(datos) {
+    return await IdManager.createWithSequentialId('countries', datos);
 }
 
-const patchCountries = async (id, datos) =>{
-    try {
-        return await fetch(`${URL_API}/${id}`, {
-            method: "PATCH",
-            headers: myHeaders,
-            body: JSON.stringify(datos)
-        });
-    } catch (error) {
-        console.error('Error en la solicitud PATCH:', error.message);
-    }
+// Función para actualizar un país existente
+// Recibe: id del país y los nuevos datos
+// Devuelve: respuesta del servidor
+async function patchCountries(id, datos) {
+    return await fetch(`${URL_API}/${id}`, {
+        method: "PATCH",
+        headers: headers,
+        body: JSON.stringify(datos)
+    });
 }
 
-const deleteCountries = async (id) =>{
-    try {
-        return await fetch(`${URL_API}/${id}`, {
-            method: "DELETE",
-            headers: myHeaders,
-        });
-    } catch (error) {
-        console.error('Error en la solicitud DELETE:', error.message);
-    }
+// Función para eliminar un país
+// Recibe: id del país a eliminar
+// Devuelve: respuesta del servidor
+async function deleteCountries(id) {
+    return await fetch(`${URL_API}/${id}`, {
+        method: "DELETE",
+        headers: headers
+    });
 }
 
 export {

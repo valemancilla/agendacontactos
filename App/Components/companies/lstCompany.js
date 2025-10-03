@@ -1,4 +1,4 @@
-import { getCompanies, deleteCompanies } from '../../../Apis/company/companyApi.js';
+import { getCompanies, deleteCompanies, patchCompanies } from '../../../Apis/company/companyApi.js';
 import { getCountries } from '../../../Apis/country/countryApi.js';
 
 export class LstCompany extends HTMLElement {
@@ -54,7 +54,7 @@ export class LstCompany extends HTMLElement {
                     const countryName = country ? country.name : 'No asignado';
                     
                     filas += `
-                        <tr>
+                        <tr data-id="${company.id}">
                             <td>${company.id}</td>
                             <td>${company.name}</td>
                             <td>${company.UKNiu}</td>
@@ -87,20 +87,122 @@ export class LstCompany extends HTMLElement {
     }
 
     async editCompany(id) {
-        const companies = await getCompanies();
-        const company = companies.find(c => c.id == id);
-        
-        const regCompany = document.querySelector('reg-company');
-        if (regCompany) {
-            regCompany.fillForm(company);
-            document.querySelector('.mncompany[data-verocultar*="#regCompany"]').click();
+        try {
+            const [companies, countries] = await Promise.all([
+                getCompanies(),
+                getCountries()
+            ]);
+            const company = companies.find(c => c.id == id);
+            
+            // Encontrar la fila correspondiente en la tabla
+            const fila = this.querySelector(`tr[data-id="${id}"]`);
+            if (fila) {
+                // Cambiar las celdas a modo edición
+                const celdaNombre = fila.querySelector('td:nth-child(2)');
+                const celdaUKNiu = fila.querySelector('td:nth-child(3)');
+                const celdaEmail = fila.querySelector('td:nth-child(4)');
+                const celdaPais = fila.querySelector('td:nth-child(5)');
+                
+                celdaNombre.innerHTML = `
+                    <input type="text" class="form-control form-control-sm" value="${company.name}" 
+                           id="edit-name-${id}">
+                `;
+                
+                celdaUKNiu.innerHTML = `
+                    <input type="text" class="form-control form-control-sm" value="${company.UKNiu}" 
+                           id="edit-ukniu-${id}">
+                `;
+                
+                celdaEmail.innerHTML = `
+                    <input type="email" class="form-control form-control-sm" value="${company.email || ''}" 
+                           id="edit-email-${id}">
+                `;
+                
+                // Crear select para países
+                let optionsHtml = '<option value="">Seleccionar país...</option>';
+                countries.forEach(country => {
+                    const selected = country.id === company.countryId ? 'selected' : '';
+                    optionsHtml += `<option value="${country.id}" ${selected}>${country.name}</option>`;
+                });
+                
+                celdaPais.innerHTML = `
+                    <select class="form-control form-control-sm" id="edit-country-${id}">
+                        ${optionsHtml}
+                    </select>
+                `;
+                
+                // Cambiar los botones de acción
+                const celdaAcciones = fila.querySelector('td:nth-child(6)');
+                celdaAcciones.innerHTML = `
+                    <button class="btn btn-sm btn-success save-company" data-id="${id}">Guardar</button>
+                    <button class="btn btn-sm btn-secondary cancel-edit" data-id="${id}">Cancelar</button>
+                `;
+                
+                // Agregar event listeners a los nuevos botones
+                this.querySelector(`.save-company[data-id="${id}"]`).addEventListener('click', (e) => this.saveCompany(e.target.dataset.id));
+                this.querySelector(`.cancel-edit[data-id="${id}"]`).addEventListener('click', (e) => this.cancelEdit(e.target.dataset.id));
+                
+                // Enfocar el primer input
+                this.querySelector(`#edit-name-${id}`).focus();
+            }
+        } catch (error) {
+            console.error('Error al obtener empresa:', error);
+            alert('Error al obtener la empresa');
         }
     }
 
+    async saveCompany(id) {
+        try {
+            const inputNombre = this.querySelector(`#edit-name-${id}`);
+            const inputUKNiu = this.querySelector(`#edit-ukniu-${id}`);
+            const inputEmail = this.querySelector(`#edit-email-${id}`);
+            const selectPais = this.querySelector(`#edit-country-${id}`);
+            
+            const nuevoNombre = inputNombre.value.trim();
+            const nuevoUKNiu = inputUKNiu.value.trim();
+            const nuevoEmail = inputEmail.value.trim();
+            const nuevoPaisId = selectPais.value;
+            
+            if (!nuevoNombre) {
+                alert('El nombre de la empresa no puede estar vacío');
+                return;
+            }
+            
+            // Actualizar la empresa
+            const response = await patchCompanies(id, { 
+                name: nuevoNombre, 
+                UKNiu: nuevoUKNiu,
+                email: nuevoEmail,
+                countryId: nuevoPaisId 
+            });
+            if (response.ok) {
+                // Recargar la tabla para mostrar los cambios
+                this.loadCompanies();
+            } else {
+                throw new Error(`Error ${response.status}: ${response.statusText}`);
+            }
+        } catch (error) {
+            console.error('Error al guardar empresa:', error);
+            alert('Error al guardar la empresa: ' + error.message);
+        }
+    }
+
+    cancelEdit(id) {
+        // Recargar la tabla para volver al estado normal
+        this.loadCompanies();
+    }
+
     async deleteCompany(id) {
-        const response = await deleteCompanies(id);
-        if (response.ok) {
-            this.loadCompanies();
+        try {
+            const response = await deleteCompanies(id);
+            if (response.ok) {
+                this.loadCompanies();
+            } else {
+                throw new Error(`Error ${response.status}: ${response.statusText}`);
+            }
+        } catch (error) {
+            console.error('Error al eliminar empresa:', error);
+            alert('Error al eliminar la empresa: ' + error.message);
         }
     }
 

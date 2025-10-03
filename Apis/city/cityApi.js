@@ -1,57 +1,48 @@
-const URL_API = "http://localhost:3000/cities";
-const myHeaders = new Headers({
-    "Content-Type": "application/json"
-});
+// ========================================
+// API PARA CIUDADES
+// ========================================
+// Este archivo contiene todas las funciones para manejar ciudades
+// Se conecta con el servidor JSON para hacer operaciones CRUD
 
-const getCities = async() => {
-    try {
-        const respuesta = await fetch(URL_API);
-        if(respuesta.status === 200){
-            const datos = await respuesta.json();
-            return datos;
-        } else if(respuesta.status === 401){
-            console.log('La url no es correcta');
-        } else if(respuesta.status === 404){
-            console.log('La ciudad no existe');
-        } else {
-            console.log('Se presentó un error en la petición consulte al Administrador');
-        } 
-    } catch(error){
-        console.error('Error al obtener ciudades:', error);
-    }
+// URL del servidor para ciudades
+const URL_API = "http://localhost:3001/cities";
+// Configuración de headers para las peticiones
+const headers = { "Content-Type": "application/json" };
+
+// Función para obtener todas las ciudades del servidor
+// Devuelve: array con todas las ciudades
+async function getCities() {
+    let response = await fetch(URL_API);
+    let cities = await response.json();
+    return cities;
 }
 
-const postCities = async (datos) => {
-    try {
-        // Usar el gestor de IDs para crear con ID secuencial
-        return await IdManager.createWithSequentialId('cities', datos);
-    } catch (error) {
-        console.error('Error en la solicitud POST:', error.message);
-        throw error;
-    }
+// Función para crear una nueva ciudad
+// Recibe: datos de la ciudad (nombre, región, etc.)
+// Devuelve: respuesta del servidor con la ciudad creada
+async function postCities(datos) {
+    return await IdManager.createWithSequentialId('cities', datos);
 }
 
-const patchCities = async (id, datos) =>{
-    try {
-        return await fetch(`${URL_API}/${id}`, {
-            method: "PATCH",
-            headers: myHeaders,
-            body: JSON.stringify(datos)
-        });
-    } catch (error) {
-        console.error('Error en la solicitud PATCH:', error.message);
-    }
+// Función para actualizar una ciudad existente
+// Recibe: id de la ciudad y los nuevos datos
+// Devuelve: respuesta del servidor
+async function patchCities(id, datos) {
+    return await fetch(`${URL_API}/${id}`, {
+        method: "PATCH",
+        headers: headers,
+        body: JSON.stringify(datos)
+    });
 }
 
-const deleteCities = async (id) =>{
-    try {
-        return await fetch(`${URL_API}/${id}`, {
-            method: "DELETE",
-            headers: myHeaders,
-        });
-    } catch (error) {
-        console.error('Error en la solicitud DELETE:', error.message);
-    }
+// Función para eliminar una ciudad
+// Recibe: id de la ciudad a eliminar
+// Devuelve: respuesta del servidor
+async function deleteCities(id) {
+    return await fetch(`${URL_API}/${id}`, {
+        method: "DELETE",
+        headers: headers
+    });
 }
 
 export {

@@ -1,4 +1,4 @@
-import { getCities, deleteCities } from '../../../Apis/city/cityApi.js';
+import { getCities, deleteCities, patchCities } from '../../../Apis/city/cityApi.js';
 import { getRegions } from '../../../Apis/region/regionApi.js';
 
 export class LstCity extends HTMLElement {
@@ -52,7 +52,7 @@ export class LstCity extends HTMLElement {
                     const regionName = region ? region.name : 'No asignada';
                     
                     filas += `
-                        <tr>
+                        <tr data-id="${city.id}">
                             <td>${city.id}</td>
                             <td>${city.name}</td>
                             <td>${regionName}</td>
@@ -83,20 +83,102 @@ export class LstCity extends HTMLElement {
     }
 
     async editCity(id) {
-        const cities = await getCities();
-        const city = cities.find(c => c.id == id);
-        
-        const regCity = document.querySelector('reg-city');
-        if (regCity) {
-            regCity.fillForm(city);
-            document.querySelector('.mnucity[data-verocultar*="#regCity"]').click();
+        try {
+            const [cities, regions] = await Promise.all([
+                getCities(),
+                getRegions()
+            ]);
+            const city = cities.find(c => c.id == id);
+            
+            // Encontrar la fila correspondiente en la tabla
+            const fila = this.querySelector(`tr[data-id="${id}"]`);
+            if (fila) {
+                // Cambiar las celdas a modo edición
+                const celdaNombre = fila.querySelector('td:nth-child(2)');
+                const celdaRegion = fila.querySelector('td:nth-child(3)');
+                const nombreOriginal = city.name;
+                const regionOriginal = city.regionId;
+                
+                celdaNombre.innerHTML = `
+                    <input type="text" class="form-control form-control-sm" value="${nombreOriginal}" 
+                           data-original="${nombreOriginal}" id="edit-name-${id}">
+                `;
+                
+                // Crear select para regiones
+                let optionsHtml = '<option value="">Seleccionar región...</option>';
+                regions.forEach(region => {
+                    const selected = region.id === regionOriginal ? 'selected' : '';
+                    optionsHtml += `<option value="${region.id}" ${selected}>${region.name}</option>`;
+                });
+                
+                celdaRegion.innerHTML = `
+                    <select class="form-control form-control-sm" id="edit-region-${id}" data-original="${regionOriginal}">
+                        ${optionsHtml}
+                    </select>
+                `;
+                
+                // Cambiar los botones de acción
+                const celdaAcciones = fila.querySelector('td:nth-child(4)');
+                celdaAcciones.innerHTML = `
+                    <button class="btn btn-sm btn-success save-city" data-id="${id}">Guardar</button>
+                    <button class="btn btn-sm btn-secondary cancel-edit" data-id="${id}">Cancelar</button>
+                `;
+                
+                // Agregar event listeners a los nuevos botones
+                this.querySelector(`.save-city[data-id="${id}"]`).addEventListener('click', (e) => this.saveCity(e.target.dataset.id));
+                this.querySelector(`.cancel-edit[data-id="${id}"]`).addEventListener('click', (e) => this.cancelEdit(e.target.dataset.id));
+                
+                // Enfocar el input
+                this.querySelector(`#edit-name-${id}`).focus();
+            }
+        } catch (error) {
+            console.error('Error al obtener ciudad:', error);
+            alert('Error al obtener la ciudad');
         }
     }
 
+    async saveCity(id) {
+        try {
+            const inputNombre = this.querySelector(`#edit-name-${id}`);
+            const selectRegion = this.querySelector(`#edit-region-${id}`);
+            const nuevoNombre = inputNombre.value.trim();
+            const nuevaRegionId = selectRegion.value;
+            
+            if (!nuevoNombre) {
+                alert('El nombre de la ciudad no puede estar vacío');
+                return;
+            }
+            
+            // Actualizar la ciudad
+            const response = await patchCities(id, { name: nuevoNombre, regionId: nuevaRegionId });
+            if (response.ok) {
+                // Recargar la tabla para mostrar los cambios
+                this.loadCities();
+            } else {
+                throw new Error(`Error ${response.status}: ${response.statusText}`);
+            }
+        } catch (error) {
+            console.error('Error al guardar ciudad:', error);
+            alert('Error al guardar la ciudad: ' + error.message);
+        }
+    }
+
+    cancelEdit(id) {
+        // Recargar la tabla para volver al estado normal
+        this.loadCities();
+    }
+
     async deleteCity(id) {
-        const response = await deleteCities(id);
-        if (response.ok) {
-            this.loadCities();
+        try {
+            const response = await deleteCities(id);
+            if (response.ok) {
+                this.loadCities();
+            } else {
+                throw new Error(`Error ${response.status}: ${response.statusText}`);
+            }
+        } catch (error) {
+            console.error('Error al eliminar ciudad:', error);
+            alert('Error al eliminar la ciudad: ' + error.message);
         }
     }
 

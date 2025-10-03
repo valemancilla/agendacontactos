@@ -1,57 +1,48 @@
-const URL_API = "http://localhost:3000/branches";
-const myHeaders = new Headers({
-    "Content-Type": "application/json"
-});
+// ========================================
+// API PARA SUCURSALES
+// ========================================
+// Este archivo contiene todas las funciones para manejar sucursales
+// Se conecta con el servidor JSON para hacer operaciones CRUD
 
-const getBranches = async() => {
-    try {
-        const respuesta = await fetch(URL_API);
-        if(respuesta.status === 200){
-            const datos = await respuesta.json();
-            return datos;
-        } else if(respuesta.status === 401){
-            console.log('La url no es correcta');
-        } else if(respuesta.status === 404){
-            console.log('La sucursal no existe');
-        } else {
-            console.log('Se presentó un error en la petición consulte al Administrador');
-        } 
-    } catch(error){
-        console.error('Error al obtener sucursales:', error);
-    }
+// URL del servidor para sucursales
+const URL_API = "http://localhost:3001/branches";
+// Configuración de headers para las peticiones
+const headers = { "Content-Type": "application/json" };
+
+// Función para obtener todas las sucursales del servidor
+// Devuelve: array con todas las sucursales
+async function getBranches() {
+    let response = await fetch(URL_API);
+    let branches = await response.json();
+    return branches;
 }
 
-const postBranches = async (datos) => {
-    try {
-        // Usar el gestor de IDs para crear con ID secuencial
-        return await IdManager.createWithSequentialId('branches', datos);
-    } catch (error) {
-        console.error('Error en la solicitud POST:', error.message);
-        throw error;
-    }
+// Función para crear una nueva sucursal
+// Recibe: datos de la sucursal (número comercial, contacto, dirección, etc.)
+// Devuelve: respuesta del servidor con la sucursal creada
+async function postBranches(datos) {
+    return await IdManager.createWithSequentialId('branches', datos);
 }
 
-const patchBranches = async (id, datos) =>{
-    try {
-        return await fetch(`${URL_API}/${id}`, {
-            method: "PATCH",
-            headers: myHeaders,
-            body: JSON.stringify(datos)
-        });
-    } catch (error) {
-        console.error('Error en la solicitud PATCH:', error.message);
-    }
+// Función para actualizar una sucursal existente
+// Recibe: id de la sucursal y los nuevos datos
+// Devuelve: respuesta del servidor
+async function patchBranches(id, datos) {
+    return await fetch(`${URL_API}/${id}`, {
+        method: "PATCH",
+        headers: headers,
+        body: JSON.stringify(datos)
+    });
 }
 
-const deleteBranches = async (id) =>{
-    try {
-        return await fetch(`${URL_API}/${id}`, {
-            method: "DELETE",
-            headers: myHeaders,
-        });
-    } catch (error) {
-        console.error('Error en la solicitud DELETE:', error.message);
-    }
+// Función para eliminar una sucursal
+// Recibe: id de la sucursal a eliminar
+// Devuelve: respuesta del servidor
+async function deleteBranches(id) {
+    return await fetch(`${URL_API}/${id}`, {
+        method: "DELETE",
+        headers: headers
+    });
 }
 
 export {

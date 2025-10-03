@@ -1,14 +1,24 @@
-import { postBranches, patchBranches, deleteBranches } from '../../../Apis/branch/branchApi.js';
+// ========================================
+// COMPONENTE DE REGISTRO DE SUCURSALES
+// ========================================
+// Este componente maneja el formulario para crear y editar sucursales
+
+import { postBranches, patchBranches } from '../../../Apis/branch/branchApi.js';
+import { getCountries } from '../../../Apis/country/countryApi.js';
+import { getCompanies } from '../../../Apis/company/companyApi.js';
 
 export class RegBranch extends HTMLElement {
+    // Constructor del componente
     constructor() {
         super();
-        this.render();
-        this.saveData();
-        this.enabledBtns();
-        this.eventoEditar();
-        this.eventoEliminar();
-        this.disableFrm(true);
+        this.render(); // Crear el HTML del formulario
+        setTimeout(() => {
+            this.loadCountries(); // Cargar lista de países
+            this.loadCompanies(); // Cargar lista de empresas
+            this.saveData();      // Configurar eventos de guardado
+            window.enabledBtns(); // Activar botones
+            this.disableFrm(true); // Deshabilitar formulario inicialmente
+        }, 0);
     }
 
     render() {
@@ -24,38 +34,53 @@ export class RegBranch extends HTMLElement {
                     <form id="frmDataBranch">
                         <div class="row">
                             <div class="col">
-                                <label for="numberComercial" class="form-label">Número Comercial</label>
+                                <label for="numberComercial" class="form-label">Número Comercial <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="numberComercial" name="numberComercial">
                             </div>
                             <div class="col">
-                                <label for="Contact_name" class="form-label">Nombre del Contacto</label>
+                                <label for="Contact_name" class="form-label">Nombre del Contacto <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="Contact_name" name="Contact_name">
                             </div>
                         </div>
                         <div class="row">
                             <div class="col">
-                                <label for="Address" class="form-label">Dirección</label>
+                                <label for="Address" class="form-label">Dirección <span class="text-danger">*</span></label>
                                 <textarea class="form-control" id="Address" name="Address" rows="2"></textarea>
                             </div>
                             <div class="col">
-                                <label for="Phone" class="form-label">Teléfono</label>
+                                <label for="Phone" class="form-label">Teléfono <span class="text-danger">*</span></label>
                                 <input type="tel" class="form-control" id="Phone" name="Phone">
                             </div>
                         </div>
                         <div class="row">
                             <div class="col">
-                                <label for="email" class="form-label">Email</label>
+                                <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
                                 <input type="email" class="form-control" id="email" name="email">
+                            </div>
+                            <div class="col">
+                                <label for="countryId" class="form-label">País <span class="text-danger">*</span></label>
+                                <select class="form-control" id="countryId" name="countryId">
+                                    <option value="">Seleccionar país...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <label for="companyId" class="form-label">Empresa <span class="text-danger">*</span></label>
+                                <select class="form-control" id="companyId" name="companyId">
+                                    <option value="">Seleccionar empresa...</option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <!-- Columna vacía para mantener el layout -->
                             </div>
                         </div>
                         <div class="row mt-3">
                             <div class="col">
                                 <div class="container mt-4 text-center">
-                                    <a href="#" class="btn btn-primary" id="btnNuevo" data-ed='[["#btnGuardar","#btnCancelar"],["#btnNuevo","#btnEditar","#btnEliminar"]]'>Nuevo</a>
-                                    <a href="#" class="btn btn-dark" id="btnCancelar" data-ed='[["#btnNuevo"],["#btnGuardar","#btnEditar","#btnEliminar","#btnCancelar"]]'>Cancelar</a>
-                                    <a href="#" class="btn btn-success" id="btnGuardar" data-ed='[["#btnEditar","#btnCancelar","#btnNuevo","#btnEliminar"],["#btnGuardar"]]'>Guardar</a>
-                                    <a href="#" class="btn btn-warning" id="btnEditar" data-ed='[["#btnGuardar","#btnCancelar"],["#btnNuevo","#btnEliminar"]]'>Editar</a>
-                                    <a href="#" class="btn btn-danger" id="btnEliminar" data-ed='[["#btnNuevo"],["#btnGuardar","#btnEditar","#btnEliminar","#btnCancelar"]]'>Eliminar</a>
+                                    <a href="#" class="btn btn-primary" id="btnNuevo" data-ed='[["#btnGuardar","#btnCancelar"],["#btnNuevo"]]'>Nuevo</a>
+                                    <a href="#" class="btn btn-dark" id="btnCancelar" data-ed='[["#btnNuevo"],["#btnGuardar","#btnCancelar"]]'>Cancelar</a>
+                                    <a href="#" class="btn btn-success" id="btnGuardar" data-ed='[["#btnCancelar","#btnNuevo"],["#btnGuardar"]]'>Guardar</a>
                                 </div>
                             </div>
                         </div> 
@@ -64,116 +89,18 @@ export class RegBranch extends HTMLElement {
             </div>
         `;
         this.querySelector("#btnNuevo").addEventListener("click", (e) => {
-            this.ctrlBtn(e.target.dataset.ed);
-            this.resetIdView();
+            window.ctrlBtn(e.target.dataset.ed);
+            window.resetIdView();
             this.disableFrm(false);
         })
         this.querySelector("#btnCancelar").addEventListener("click", (e) => {
-            this.ctrlBtn(e.target.dataset.ed);
-            this.resetIdView();
+            window.ctrlBtn(e.target.dataset.ed);
+            window.resetIdView();
             this.disableFrm(true);
         })
     }
 
-    resetIdView = () => {
-        const idView = document.querySelector('#idView');
-        idView.innerHTML = '';   
-    }
 
-    eventoEditar = () => {
-        document.querySelector('#btnEditar').addEventListener("click", (e) => {
-            // Activar botones Guardar y Cancelar, desactivar Nuevo y Eliminar
-            this.ctrlBtn(e.target.dataset.ed);
-            this.disableFrm(false); // Habilitar el formulario para edición
-            e.stopImmediatePropagation();
-            e.preventDefault();        
-        });
-    }
-
-    eventoEliminar = () => {
-        document.querySelector('#btnEliminar').addEventListener("click", (e) => {
-            this.delData();
-            e.stopImmediatePropagation();
-            e.preventDefault();        
-        });
-    }
-
-    ctrlBtn = (e) => {
-        let data = JSON.parse(e);
-        data[0].forEach(boton => {
-            let btnActual = document.querySelector(boton);
-            btnActual.classList.remove('disabled');
-            btnActual.removeAttribute('disabled');
-        });
-        data[1].forEach(boton => {
-            let btnActual = document.querySelector(boton);
-            btnActual.classList.add('disabled');
-            btnActual.setAttribute('disabled', 'disabled');
-        });
-    }
-
-    enabledBtns = () => {
-        document.querySelectorAll(".btn").forEach((val, id) => {
-            this.ctrlBtn(val.dataset.ed);
-        })
-    }
-
-    editData = () => {
-        const frmRegistro = document.querySelector('#frmDataBranch');
-        const datos = Object.fromEntries(new FormData(frmRegistro).entries());
-        const idView = document.querySelector('#idView');
-        let id = idView.textContent;
-        
-        if (!id) {
-            alert('No hay sucursal seleccionada para editar');
-            return;
-        }
-
-        patchBranches(id, datos)
-            .then(response => {
-                if (response.ok) {
-                    this.resetIdView();
-                    this.disableFrm(true);
-                    this.ctrlBtn(document.querySelector('#btnNuevo').dataset.ed);
-                    // Disparar evento para actualizar listado
-                    window.dispatchEvent(new CustomEvent('branchUpdated', { detail: { id, datos } }));
-                } else {
-                    throw new Error(`Error ${response.status}: ${response.statusText}`);
-                }
-            })
-            .catch(error => {
-                console.error('Error al actualizar sucursal:', error);
-                alert('Error al actualizar la sucursal');
-            });
-    }
-
-    delData = () => {
-        const idView = document.querySelector('#idView');
-        let id = idView.textContent;
-        
-        if (!id) {
-            alert('No hay sucursal seleccionada para eliminar');
-            return;
-        }
-
-
-        deleteBranches(id)
-            .then(response => {
-                if (response.ok) {
-                    this.resetIdView();
-                    this.disableFrm(true);
-                    this.ctrlBtn(document.querySelector('#btnNuevo').dataset.ed);
-                    // Disparar evento para actualizar listado
-                    window.dispatchEvent(new CustomEvent('branchDeleted', { detail: { id } }));
-                } else {
-                    throw new Error(`Error ${response.status}: ${response.statusText}`);
-                }
-            })
-            .catch(error => {
-                console.error('Error al eliminar sucursal:', error);
-                alert('Error al eliminar la sucursal');
-            });   
-    }
 
     saveData = () => {
         const frmRegistro = document.querySelector('#frmDataBranch');
@@ -185,9 +112,39 @@ export class RegBranch extends HTMLElement {
                 const datos = Object.fromEntries(new FormData(frmRegistro).entries());
                 console.log('📤 Guardando sucursal:', datos);
                 
-                // Validar que el nombre no esté vacío
-                if (!datos.name || datos.name.trim() === '') {
-                    alert('El nombre de la sucursal es requerido');
+                // Validar campos obligatorios
+                if (!datos.numberComercial || datos.numberComercial.trim() === '') {
+                    alert('Complete todos los campos');
+                    return;
+                }
+                
+                if (!datos.Contact_name || datos.Contact_name.trim() === '') {
+                    alert('Complete todos los campos');
+                    return;
+                }
+                
+                if (!datos.Address || datos.Address.trim() === '') {
+                    alert('Complete todos los campos');
+                    return;
+                }
+                
+                if (!datos.Phone || datos.Phone.trim() === '') {
+                    alert('Complete todos los campos');
+                    return;
+                }
+                
+                if (!datos.email || datos.email.trim() === '') {
+                    alert('Complete todos los campos');
+                    return;
+                }
+                
+                if (!datos.countryId || datos.countryId.trim() === '') {
+                    alert('Complete todos los campos');
+                    return;
+                }
+                
+                if (!datos.companyId || datos.companyId.trim() === '') {
+                    alert('Complete todos los campos');
                     return;
                 }
                 
@@ -196,67 +153,47 @@ export class RegBranch extends HTMLElement {
                 const currentId = idView.textContent.trim();
                 
                 if (currentId) {
-                    // Modo edición - usar PATCH
-                    console.log('📝 Modo edición - actualizando sucursal ID:', currentId);
+                    // Editar sucursal existente
                     patchBranches(currentId, datos)
                         .then(response => {
-                            console.log('📡 Respuesta del servidor (PATCH):', response);
-                            console.log('📊 Status:', response.status);
-                            console.log('📊 StatusText:', response.statusText);
-                            
                             if (response.ok) {
-                                this.resetIdView();
+                                window.resetIdView();
                                 this.disableFrm(true);
-                                this.ctrlBtn(document.querySelector('#btnNuevo').dataset.ed);
-                                // Disparar evento para actualizar listado
+                                window.ctrlBtn(document.querySelector('#btnNuevo').dataset.ed);
                                 window.dispatchEvent(new CustomEvent('branchUpdated', { detail: { id: currentId, datos } }));
                             } else {
-                                throw new Error(`Error en la solicitud PATCH: ${response.status} - ${response.statusText}`);
+                                throw new Error(`Error: ${response.status} - ${response.statusText}`);
                             }
                         })
                         .catch(error => {
-                            console.error('Error al actualizar sucursal:', error);
-                            alert('Error al actualizar la sucursal: ' + error.message);
+                            alert('Error al actualizar: ' + error.message);
                         });
                 } else {
-                    // Modo creación - usar POST
-                    console.log('➕ Modo creación - creando nueva sucursal');
+                    // Crear nueva sucursal
                     postBranches(datos)
                         .then(response => {
-                            console.log('📡 Respuesta del servidor (POST):', response);
-                            console.log('📊 Status:', response.status);
-                            console.log('📊 StatusText:', response.statusText);
-                            
                             if (response.ok) {
                                 return response.json();
                             } else {
-                                throw new Error(`Error en la solicitud POST: ${response.status} - ${response.statusText}`);
+                                throw new Error(`Error: ${response.status} - ${response.statusText}`);
                             }
                         })
                         .then(responseData => {
-                            console.log('Sucursal guardada exitosamente:', responseData);
-                            this.viewData(responseData.id);
+                            window.viewData(responseData.id);
                             this.disableFrm(true);
-                            this.ctrlBtn(e.target.dataset.ed);
-                            // Disparar evento para actualizar listado
+                            window.ctrlBtn(e.target.dataset.ed);
                             window.dispatchEvent(new CustomEvent('branchSaved', { detail: responseData }));
                         })
                         .catch(error => {
-                            console.error('Error al crear sucursal:', error.message);
-                            alert('Error al crear la sucursal: ' + error.message);
+                            alert('Error al crear: ' + error.message);
                         });
                 }
             } catch (error) {
-                console.error('Error en saveData:', error);
-                alert('Error inesperado: ' + error.message);
+                alert('Error: ' + error.message);
             }
         })
     }
 
-    viewData = (id) => {
-        const idView = document.querySelector('#idView');
-        idView.innerHTML = id;
-    }
 
     fillForm = (branch) => {
         const frmRegistro = document.querySelector('#frmDataBranch');
@@ -265,28 +202,61 @@ export class RegBranch extends HTMLElement {
         frmRegistro.elements['Address'].value = branch.Address;
         frmRegistro.elements['Phone'].value = branch.Phone;
         frmRegistro.elements['email'].value = branch.email;
-        this.viewData(branch.id);
+        frmRegistro.elements['countryId'].value = branch.countryId || '';
+        frmRegistro.elements['companyId'].value = branch.companyId || '';
+        window.viewData(branch.id);
         this.disableFrm(false);
         
         // Activar botones de edición (Guardar y Cancelar)
-        const btnEditar = document.querySelector('#btnEditar');
-        if (btnEditar) {
-            this.ctrlBtn(btnEditar.dataset.ed);
+        window.ctrlBtn(document.querySelector('#btnGuardar').dataset.ed);
+    }
+
+    loadCountries = async () => {
+        try {
+            const countries = await getCountries();
+            const countrySelect = document.querySelector('#countryId');
+            
+            if (countries && countries.length > 0) {
+                // Limpiar opciones existentes excepto la primera
+                countrySelect.innerHTML = '<option value="">Seleccionar país...</option>';
+                
+                // Agregar países al selector
+                countries.forEach(country => {
+                    const option = document.createElement('option');
+                    option.value = country.id;
+                    option.textContent = country.name;
+                    countrySelect.appendChild(option);
+                });
+            }
+        } catch (error) {
+            console.error('Error cargando países:', error);
+        }
+    }
+
+    loadCompanies = async () => {
+        try {
+            const companies = await getCompanies();
+            const companySelect = document.querySelector('#companyId');
+            
+            if (companies && companies.length > 0) {
+                // Limpiar opciones existentes excepto la primera
+                companySelect.innerHTML = '<option value="">Seleccionar empresa...</option>';
+                
+                // Agregar empresas al selector
+                companies.forEach(company => {
+                    const option = document.createElement('option');
+                    option.value = company.id;
+                    option.textContent = company.name;
+                    companySelect.appendChild(option);
+                });
+            }
+        } catch (error) {
+            console.error('Error cargando empresas:', error);
         }
     }
 
     disableFrm = (estado) => {
-        const frmRegistro = document.querySelector('#frmDataBranch');
-        frmRegistro.elements['numberComercial'].value = '';
-        frmRegistro.elements['Contact_name'].value = '';
-        frmRegistro.elements['Address'].value = '';
-        frmRegistro.elements['Phone'].value = '';
-        frmRegistro.elements['email'].value = '';
-        frmRegistro.elements['numberComercial'].disabled = estado;
-        frmRegistro.elements['Contact_name'].disabled = estado;
-        frmRegistro.elements['Address'].disabled = estado;
-        frmRegistro.elements['Phone'].disabled = estado;
-        frmRegistro.elements['email'].disabled = estado;
+        window.disableFrm(estado, '#frmDataBranch');
     }
 }
 

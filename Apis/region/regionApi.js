@@ -1,57 +1,48 @@
-const URL_API = "http://localhost:3000/regions";
-const myHeaders = new Headers({
-    "Content-Type": "application/json"
-});
+// ========================================
+// API PARA REGIONES
+// ========================================
+// Este archivo contiene todas las funciones para manejar regiones
+// Se conecta con el servidor JSON para hacer operaciones CRUD
 
-const getRegions = async() => {
-    try {
-        const respuesta = await fetch(URL_API);
-        if(respuesta.status === 200){
-            const datos = await respuesta.json();
-            return datos;
-        } else if(respuesta.status === 401){
-            console.log('La url no es correcta');
-        } else if(respuesta.status === 404){
-            console.log('La región no existe');
-        } else {
-            console.log('Se presentó un error en la petición consulte al Administrador');
-        } 
-    } catch(error){
-        console.error('Error al obtener regiones:', error);
-    }
+// URL del servidor para regiones
+const URL_API = "http://localhost:3001/regions";
+// Configuración de headers para las peticiones
+const headers = { "Content-Type": "application/json" };
+
+// Función para obtener todas las regiones del servidor
+// Devuelve: array con todas las regiones
+async function getRegions() {
+    let response = await fetch(URL_API);
+    let regions = await response.json();
+    return regions;
 }
 
-const postRegions = async (datos) => {
-    try {
-        // Usar el gestor de IDs para crear con ID secuencial
-        return await IdManager.createWithSequentialId('regions', datos);
-    } catch (error) {
-        console.error('Error en la solicitud POST:', error.message);
-        throw error;
-    }
+// Función para crear una nueva región
+// Recibe: datos de la región (nombre, país, etc.)
+// Devuelve: respuesta del servidor con la región creada
+async function postRegions(datos) {
+    return await IdManager.createWithSequentialId('regions', datos);
 }
 
-const patchRegions = async (id, datos) =>{
-    try {
-        return await fetch(`${URL_API}/${id}`, {
-            method: "PATCH",
-            headers: myHeaders,
-            body: JSON.stringify(datos)
-        });
-    } catch (error) {
-        console.error('Error en la solicitud PATCH:', error.message);
-    }
+// Función para actualizar una región existente
+// Recibe: id de la región y los nuevos datos
+// Devuelve: respuesta del servidor
+async function patchRegions(id, datos) {
+    return await fetch(`${URL_API}/${id}`, {
+        method: "PATCH",
+        headers: headers,
+        body: JSON.stringify(datos)
+    });
 }
 
-const deleteRegions = async (id) =>{
-    try {
-        return await fetch(`${URL_API}/${id}`, {
-            method: "DELETE",
-            headers: myHeaders,
-        });
-    } catch (error) {
-        console.error('Error en la solicitud DELETE:', error.message);
-    }
+// Función para eliminar una región
+// Recibe: id de la región a eliminar
+// Devuelve: respuesta del servidor
+async function deleteRegions(id) {
+    return await fetch(`${URL_API}/${id}`, {
+        method: "DELETE",
+        headers: headers
+    });
 }
 
 export {

@@ -1,4 +1,4 @@
-import { getCountries, deleteCountries } from '../../../Apis/country/countryApi.js';
+import { getCountries, deleteCountries, patchCountries } from '../../../Apis/country/countryApi.js';
 
 export class LstCountry extends HTMLElement {
     constructor() {
@@ -43,7 +43,7 @@ export class LstCountry extends HTMLElement {
                 let filas = '';
                 countries.forEach(country => {
                     filas += `
-                        <tr>
+                        <tr data-id="${country.id}">
                             <td>${country.id}</td>
                             <td>${country.name}</td>
                             <td>
@@ -79,17 +79,65 @@ export class LstCountry extends HTMLElement {
             const countries = await getCountries();
             const country = countries.find(c => c.id == id);
             
-            // Llenar el formulario de registro con los datos
-            const regCountry = document.querySelector('reg-country');
-            if (regCountry) {
-                regCountry.fillForm(country);
-                // Cambiar a la pestaña de registro
-                document.querySelector('.mnucountry[data-verocultar*="#regCountry"]').click();
+            // Encontrar la fila correspondiente en la tabla
+            const fila = this.querySelector(`tr[data-id="${id}"]`);
+            if (fila) {
+                // Cambiar la celda del nombre a modo edición
+                const celdaNombre = fila.querySelector('td:nth-child(2)');
+                const nombreOriginal = country.name;
+                
+                celdaNombre.innerHTML = `
+                    <input type="text" class="form-control form-control-sm" value="${nombreOriginal}" 
+                           data-original="${nombreOriginal}" id="edit-name-${id}">
+                `;
+                
+                // Cambiar los botones de acción
+                const celdaAcciones = fila.querySelector('td:nth-child(3)');
+                celdaAcciones.innerHTML = `
+                    <button class="btn btn-sm btn-success save-country" data-id="${id}">Guardar</button>
+                    <button class="btn btn-sm btn-secondary cancel-edit" data-id="${id}">Cancelar</button>
+                `;
+                
+                // Agregar event listeners a los nuevos botones
+                this.querySelector(`.save-country[data-id="${id}"]`).addEventListener('click', (e) => this.saveCountry(e.target.dataset.id));
+                this.querySelector(`.cancel-edit[data-id="${id}"]`).addEventListener('click', (e) => this.cancelEdit(e.target.dataset.id));
+                
+                // Enfocar el input
+                this.querySelector(`#edit-name-${id}`).focus();
             }
         } catch (error) {
             console.error('Error al obtener país:', error);
             alert('Error al obtener el país');
         }
+    }
+
+    async saveCountry(id) {
+        try {
+            const input = this.querySelector(`#edit-name-${id}`);
+            const nuevoNombre = input.value.trim();
+            
+            if (!nuevoNombre) {
+                alert('El nombre del país no puede estar vacío');
+                return;
+            }
+            
+            // Actualizar el país
+            const response = await patchCountries(id, { name: nuevoNombre });
+            if (response.ok) {
+                // Recargar la tabla para mostrar los cambios
+                this.loadCountries();
+            } else {
+                throw new Error(`Error ${response.status}: ${response.statusText}`);
+            }
+        } catch (error) {
+            console.error('Error al guardar país:', error);
+            alert('Error al guardar el país: ' + error.message);
+        }
+    }
+
+    cancelEdit(id) {
+        // Recargar la tabla para volver al estado normal
+        this.loadCountries();
     }
 
     async deleteCountry(id) {
